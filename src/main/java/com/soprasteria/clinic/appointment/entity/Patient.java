@@ -1,7 +1,13 @@
 package com.soprasteria.clinic.appointment.entity;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 public class Patient {
@@ -11,12 +17,46 @@ public class Patient {
     @SequenceGenerator(name = "patient_seq", sequenceName = "patient_sequence", allocationSize = 1)
     private Long patient_id;
 
+    @NotBlank(message = "Patient name is required")
     private String patient_name;
+
+    @NotBlank(message = "Patient email is required")
+    @Column(unique = true)
+    @Email(message = "Please provide a valid email address")
     private String patient_email;
+
+    @NotBlank(message = "Patient phone number is required")
+    @Column(unique = true)
+    @Pattern(regexp = "^[0-9]{10}$", message = "Please provide a valid phone number")
+    @Size(min = 10, max = 10, message = "Please provide a valid phone number")
     private String patient_phoneNumber;
+
+    @NotBlank(message = "Age is mandatory")
+    @Pattern(regexp = "^\\d{1,2}$", message = "Age must be between 1 and 2 digits")
+    private String patient_age;
+
+    @NotBlank(message = "Patient username is required")
+    @Column(unique = true)
     private String username;
+
+    @NotBlank(message = "Password is mandatory")
     private String patient_password;
+
     private String role = "PATIENT";
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    // One-to-many relationship with Appointment
+    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
+    @JsonManagedReference("appointment-patient")  // Same unique name as in Appointment entity
+    private List<Appointment> patient_appointments;
+
 
     // Getters and Setters
     public Long getPatient_id() {
@@ -51,6 +91,14 @@ public class Patient {
         this.patient_phoneNumber = patient_phoneNumber;
     }
 
+    public String getPatient_age() {
+        return patient_age;
+    }
+
+    public void setPatient_age(String patient_age) {
+        this.patient_age = patient_age;
+    }
+
     public String getUsername() {
         return username;
     }
@@ -66,17 +114,6 @@ public class Patient {
     public void setPatient_password(String patient_password) {
         this.patient_password = patient_password;
     }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    private List<Appointment> patient_appointments;
 
     public List<Appointment> getPatient_appointments() {
         return patient_appointments;

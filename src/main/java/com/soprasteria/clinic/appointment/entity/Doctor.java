@@ -1,7 +1,10 @@
 package com.soprasteria.clinic.appointment.entity;
 
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class Doctor {
@@ -11,11 +14,37 @@ public class Doctor {
     @SequenceGenerator(name = "doctor_seq", sequenceName = "doctor_sequence", allocationSize = 1)
     private Long doctor_id;
 
+    @NotBlank(message = "Name is mandatory")
     private String doctor_name;
+
+    @NotBlank(message = "Specialization is mandatory")
     private String doctor_specialization;
+
+    @NotBlank(message = "Username is mandatory")
+    @Column(unique = true)
     private String username;
+
+    @NotBlank(message = "Password is mandatory")
     private String doctor_password;
+
     private String role = "DOCTOR";
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    // One-to-many relationship with Availability
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    private List<Availability> doctor_availabilities;
+
+    // One-to-many relationship with Appointment
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
+    @JsonManagedReference("appointment-doctor")  // Same unique name as in Appointment entity
+    private List<Appointment> doctor_appointments;
 
     // Getters and Setters
     public Long getDoctor_id() {
@@ -57,20 +86,6 @@ public class Doctor {
     public void setDoctor_password(String doctor_password) {
         this.doctor_password = doctor_password;
     }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<Availability> doctor_availabilities;
-
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<Appointment> doctor_appointments;
 
     public List<Availability> getDoctor_availabilities() {
         return doctor_availabilities;

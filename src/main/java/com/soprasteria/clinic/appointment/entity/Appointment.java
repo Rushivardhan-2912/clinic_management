@@ -2,7 +2,12 @@ package com.soprasteria.clinic.appointment.entity;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Appointment {
@@ -12,17 +17,28 @@ public class Appointment {
     @SequenceGenerator(name = "appointment_seq", sequenceName = "appointment_sequence", allocationSize = 1)
     private Long appointment_id;
 
+    @NotNull(message = "Appointment date cannot be null")
+    @FutureOrPresent(message = "Appointment date must be today or future")
     private LocalDate appointment_date;
+
+    @NotNull(message = "Start time cannot be null")
     private LocalTime appointment_startTime;
+
+    @NotNull(message = "End time cannot be null")
     private LocalTime appointment_endTime;
+
+    @NotBlank(message = "Status is mandatory")
     private String appointment_status;
 
+    // Many-to-one relationship with Patient
     @ManyToOne
     @JoinColumn(name = "patient_id")
+    @JsonBackReference("appointment-patient")  // Unique name for patient reference
     private Patient patient;
 
     @ManyToOne
     @JoinColumn(name = "doctor_id")
+    @JsonBackReference("appointment-doctor")  // Unique name for doctor reference
     private Doctor doctor;
 
     // Getters and Setters

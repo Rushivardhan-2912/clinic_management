@@ -1,8 +1,12 @@
 package com.soprasteria.clinic.appointment.entity;
 
 import java.time.*;
-import com.soprasteria.clinic.appointment.DTO.DoctorDTO;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Entity
 public class Availability {
@@ -12,12 +16,34 @@ public class Availability {
     @SequenceGenerator(name = "availability_seq", sequenceName = "availability_sequence", allocationSize = 1)
     private Long availability_id;
 
+    @NotNull(message = "Availability date cannot be null")
+    @FutureOrPresent(message = "Availability date must be today or future")
     private LocalDate availability_date;
+
+    @NotNull(message = "Availability start time cannot be null")
     private LocalTime availability_startTime;
+
+    @NotNull(message = "Availability end time cannot be null")
     private LocalTime availability_endTime;
+
+
     private String availability_status;
 
+    @ManyToOne
+    @JoinColumn(name = "doctor_id")
+    @JsonBackReference
+    private Doctor doctor;
+
+    public String getAvailability_status() {
+		return availability_status;
+	}
+
+	public void setAvailability_status(String availability_status) {
+		this.availability_status = availability_status;
+	}
+
     // Getters and Setters
+
     public Long getAvailability_id() {
         return availability_id;
     }
@@ -50,18 +76,6 @@ public class Availability {
         this.availability_endTime = availability_endTime;
     }
 
-    public String getAvailability_status() {
-        return availability_status;
-    }
-
-    public void setAvailability_status(String availability_status) {
-        this.availability_status = availability_status;
-    }
-
-    @ManyToOne
-    @JoinColumn(name = "doctor_id")
-    private Doctor doctor;
-
     public Doctor getDoctor() {
         return doctor;
     }
@@ -69,4 +83,5 @@ public class Availability {
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
     }
+
 }
