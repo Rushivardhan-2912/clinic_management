@@ -1,37 +1,23 @@
 package com.soprasteria.clinic.appointment.controller;
 
-import com.soprasteria.clinic.appointment.config.CustomUserDetailsService;
 import com.soprasteria.clinic.appointment.dto.AuthRequest;
-import com.soprasteria.clinic.appointment.dto.AuthResponse;
-import com.soprasteria.clinic.appointment.config.JwtService;
-
+import com.soprasteria.clinic.appointment.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.*;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/auth")
 public class AuthController {
 
     @Autowired
-    private AuthenticationManager authenticationManager;
-
-    @Autowired
-    private CustomUserDetailsService userDetailsService;
-
-    @Autowired
-    private JwtService jwtService;
+    private AuthService authService;
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
-        );
-
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
-        String token = jwtService.generateToken(userDetails);
-
-        return new AuthResponse(token);
+    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+        return authService.login(request);
     }
 }
