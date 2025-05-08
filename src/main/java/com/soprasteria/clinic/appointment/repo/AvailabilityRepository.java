@@ -1,14 +1,14 @@
 package com.soprasteria.clinic.appointment.repo;
 
-import com.soprasteria.clinic.appointment.entity.Doctor;
+import com.soprasteria.clinic.appointment.entity.Availability;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-
-import com.soprasteria.clinic.appointment.entity.Availability;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -16,6 +16,9 @@ import java.util.List;
 
 @Repository
 public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
+
+    @Query("SELECT a FROM Availability a WHERE a.doctor.id = :doctorId")
+    Page<Availability> findBydoctorId(@Param("doctorId") Long doctorId, Pageable pageable);
 
     // Check if a time slot is available for a doctor
     @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END " +
@@ -43,6 +46,7 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
     // Find overlapping availability slots for a doctor
     @Query("SELECT a FROM Availability a " +
             "WHERE a.doctor.doctor_id = :doctorId " +
+            "AND a.availability_date = :date " +
             "AND (a.availability_startTime < :endTime " +
             "AND a.availability_endTime > :startTime)")
     List<Availability> findOverlappingAvailabilities(@Param("doctorId") Long doctorId,
