@@ -1,12 +1,12 @@
 package com.soprasteria.clinic.appointment.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.soprasteria.clinic.appointment.dto.AvailabilityDTO;
 import com.soprasteria.clinic.appointment.dto.AppointmentDTO;
+import com.soprasteria.clinic.appointment.dto.AvailabilityDTO;
 import com.soprasteria.clinic.appointment.dto.DoctorDTO;
 import com.soprasteria.clinic.appointment.dto.PatientDTO;
-import com.soprasteria.clinic.appointment.entity.Availability;
 import com.soprasteria.clinic.appointment.entity.Appointment;
+import com.soprasteria.clinic.appointment.entity.Availability;
 import com.soprasteria.clinic.appointment.entity.Doctor;
 import com.soprasteria.clinic.appointment.entity.Patient;
 import org.apache.logging.log4j.LogManager;
@@ -23,14 +23,14 @@ public class GlobalMapper {
     private static final Logger logger = LogManager.getLogger(GlobalMapper.class);
 
     // PATIENT
-    public Patient toPatientEntity(PatientDTO dto){
+    public Patient toPatientEntity(PatientDTO dto) {
         logger.debug("Converting PatientDTO to entity: {}", dto);
         Patient patient = objectMapper.convertValue(dto, Patient.class);
         logger.debug("Converted to Patient entity: {}", patient);
         return patient;
     }
 
-    public PatientDTO toPatientDTO(Patient patient){
+    public PatientDTO toPatientDTO(Patient patient) {
         logger.debug("Converting Patient entity to DTO: {}", patient);
         PatientDTO dto = objectMapper.convertValue(patient, PatientDTO.class);
         logger.debug("Converted to PatientDTO: {}", dto);
@@ -38,14 +38,14 @@ public class GlobalMapper {
     }
 
     // DOCTOR
-    public Doctor toDoctorEntity(DoctorDTO dto){
+    public Doctor toDoctorEntity(DoctorDTO dto) {
         logger.debug("Converting DoctorDTO to entity: {}", dto);
         Doctor doctor = objectMapper.convertValue(dto, Doctor.class);
         logger.debug("Converted to Doctor entity: {}", doctor);
         return doctor;
     }
 
-    public DoctorDTO toDoctorDTO(Doctor doctor){
+    public DoctorDTO toDoctorDTO(Doctor doctor) {
         logger.debug("Converting Doctor entity to DTO: {}", doctor);
         DoctorDTO dto = objectMapper.convertValue(doctor, DoctorDTO.class);
         logger.debug("Converted to DoctorDTO: {}", dto);
