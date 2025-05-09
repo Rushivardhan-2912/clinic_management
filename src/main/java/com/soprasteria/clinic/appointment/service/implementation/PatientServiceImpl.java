@@ -91,7 +91,7 @@ public class PatientServiceImpl implements PatientService {
             Patient savedPatient = patientRepository.save(existingPatient);
 
             return ResponseEntity.ok(globalMapper.toPatientDTO(savedPatient));
-        } catch (PatientNotFoundException | ClinicExceptionHandler.UnauthorizedAccessException e) {
+        } catch (ClinicExceptionHandler.PatientNotFoundException | ClinicExceptionHandler.UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating patient", e);

@@ -1,17 +1,28 @@
 package com.soprasteria.clinic.appointment.service.implementation;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.soprasteria.clinic.appointment.dto.DoctorDTO;
 import com.soprasteria.clinic.appointment.entity.Doctor;
+import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler;
+import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.DoctorNotFoundException;
+import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.UnauthorizedAccessException;
 import com.soprasteria.clinic.appointment.mapper.GlobalMapper;
 import com.soprasteria.clinic.appointment.repo.DoctorRepository;
 import com.soprasteria.clinic.appointment.service.DoctorService;
+import com.soprasteria.clinic.appointment.util.NullPropertyUtils;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class DoctorServiceImpl implements DoctorService {
@@ -50,6 +61,20 @@ public class DoctorServiceImpl implements DoctorService {
         } catch (Exception e) {
             logger.error("Error during doctor registration", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Registration failed");
+        }
+    }
+
+    @Override
+    public ResponseEntity<?> getAllDoctors(int page, int size) {
+        try {
+            logger.info("Fetching all doctors - page: {}, size: {}", page, size);
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Doctor> doctorsPage = doctorRepository.findAll(pageable);
+            List<DoctorDTO> doctors = doctorsPage.map(globalMapper::toDoctorDTO).getContent();
+            return ResponseEntity.ok(doctors);
+        } catch (Exception e) {
+            logger.error("Error retrieving doctor list", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve doctors");
         }
     }
 

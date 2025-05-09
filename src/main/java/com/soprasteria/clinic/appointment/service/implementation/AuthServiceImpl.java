@@ -17,10 +17,13 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AuthServiceImpl implements AuthService {
+
     @Autowired
     private AuthenticationManager authenticationManager;
+
     @Autowired
     private CustomUserDetailsService userDetailsService;
+
     @Autowired
     private JwtService jwtService;
 
@@ -30,14 +33,14 @@ public class AuthServiceImpl implements AuthService {
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getUsername(),
-                            request.getPassword()
-                    )
+                            request.getPassword())
             );
 
             UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
             String token = jwtService.generateToken(userDetails);
 
             return ResponseEntity.ok(new AuthResponseDTO(token));
+
         } catch (ClinicExceptionHandler.BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
         } catch (UsernameNotFoundException ex) {

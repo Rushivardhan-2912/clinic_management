@@ -2,10 +2,7 @@ package com.soprasteria.clinic.appointment.service.implementation;
 
 import com.soprasteria.clinic.appointment.dto.AppointmentDTO;
 import com.soprasteria.clinic.appointment.entity.*;
-import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.DoctorNotFoundException;
-import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.InvalidTimeSlotException;
-import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.PatientNotFoundException;
-import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.UnauthorizedAccessException;
+import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.*;
 import com.soprasteria.clinic.appointment.mapper.GlobalMapper;
 import com.soprasteria.clinic.appointment.repo.AppointmentRepository;
 import com.soprasteria.clinic.appointment.repo.AvailabilityRepository;

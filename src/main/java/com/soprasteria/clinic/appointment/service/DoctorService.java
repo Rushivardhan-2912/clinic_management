@@ -15,5 +15,4 @@ public interface DoctorService {
     ResponseEntity<?> updateDoctor(DoctorDTO doctorDTO, Long id, String loginUsername);
 
     ResponseEntity<?> deleteDoctorById(Long id);
-
 }
