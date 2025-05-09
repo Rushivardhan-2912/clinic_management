@@ -29,7 +29,8 @@ public class AvailabilityController {
             @RequestBody AvailabilityDTO availabilityDTO,
             @PathVariable Long id,
             Authentication authentication) {
-        return availabilityService.addAvailability(availabilityDTO, id, authentication);
+        logger.info("Attempting to add availability for doctor ID: {} by user: {}", id, authentication.getName());
+        return availabilityService.addAvailability(availabilityDTO, id, authentication.getName());
     }
 
     @GetMapping
@@ -37,7 +38,8 @@ public class AvailabilityController {
     public ResponseEntity<?> getAllAvailabilities(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return availabilityService.getAllAvailabilities(page, size);
+        logger.info("Retrieving all availabilities");
+        return availabilityService.getAllAvailabilities();
     }
 
     @GetMapping("/doctor/{id}")
@@ -46,7 +48,8 @@ public class AvailabilityController {
             @PathVariable Long id,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        return availabilityService.getDoctorAvailabilities(id, page, size);
+        logger.info("Retrieving availabilities for doctor ID: {} ", id );
+        return availabilityService.getDoctorAvailabilities(id);
     }
 
     @PutMapping("/doctor/availability/{availabilityId}")
@@ -55,7 +58,8 @@ public class AvailabilityController {
             @RequestBody AvailabilityDTO availabilityDTO,
             @PathVariable Long availabilityId,
             Authentication authentication) {
-        return availabilityService.updateAvailability(availabilityDTO, availabilityId, authentication);
+        logger.info("Attempting to update availability ID: {} by user: {}", availabilityId, authentication.getName());
+        return availabilityService.updateAvailability(availabilityDTO, availabilityId, authentication.getName());
     }
 
     @DeleteMapping("/doctor/{id}")
@@ -63,6 +67,7 @@ public class AvailabilityController {
     public ResponseEntity<?> deleteAvailability(
             @PathVariable Long id,
             Authentication authentication) {
+        logger.info("Attempting to delete availability with ID: {} by user: {}", id, authentication.getName());
         return availabilityService.deleteAvailability(id, doctorRepository.findById(id).get().getUsername(), authentication);
     }
 }

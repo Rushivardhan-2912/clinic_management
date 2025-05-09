@@ -28,7 +28,8 @@ public class AppointmentController {
 	public ResponseEntity<?> bookAppointment(@RequestBody AppointmentDTO appointmentDTO,
 											 @PathVariable Long id,
 											 Authentication authentication) {
-		return appointmentService.bookAppointment(appointmentDTO, id, authentication);
+		logger.info("Attempting to book appointment for patient ID: {}", id);
+		return appointmentService.bookAppointment(appointmentDTO, id, authentication.getName());
 	}
 
 	@GetMapping("/patient/{id}")
@@ -37,7 +38,8 @@ public class AppointmentController {
 														@RequestParam(defaultValue = "0") int page,
 														@RequestParam(defaultValue = "10") int size,
 														Authentication authentication) {
-		return appointmentService.viewAllAppointmentsForPatient(id, page, size, authentication);
+		logger.info("Retrieving appointments for patient ID: {} ", id);
+		return appointmentService.viewAllAppointmentsForPatient(id, authentication);
 	}
 
 	@GetMapping("/doctor/{id}")
@@ -46,14 +48,16 @@ public class AppointmentController {
 													   @RequestParam(defaultValue = "0") int page,
 													   @RequestParam(defaultValue = "10") int size,
 													   Authentication authentication) {
-		return appointmentService.viewAllAppointmentsForDoctor(id, page, size, authentication);
+		logger.info("Retrieving appointments for doctor ID: {}", id);
+		return appointmentService.viewAllAppointmentsForDoctor(id, authentication);
 	}
 
 	@GetMapping
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> viewAllAppointments(@RequestParam(defaultValue = "0") int page,
 												 @RequestParam(defaultValue = "10") int size) {
-		return appointmentService.viewAllAppointments(page, size);
+		logger.info("Retrieving all appointments");
+		return appointmentService.viewAllAppointments();
 	}
 
 	@PutMapping("/{appointmentId}")
@@ -61,6 +65,7 @@ public class AppointmentController {
 	public ResponseEntity<?> updateAppointment(@RequestBody AppointmentDTO appointmentDTO,
 											   @PathVariable Long appointmentId,
 											   Authentication authentication) {
+		logger.info("Attempting to update appointment ID: {}", appointmentId);
 		return appointmentService.rescheduleAppointment(appointmentDTO, appointmentId, authentication.getName());
 	}
 
@@ -69,6 +74,7 @@ public class AppointmentController {
 	public ResponseEntity<?> cancelAppointment(@PathVariable Long appointmentId,
 											   @PathVariable Long patientId,
 											   Authentication authentication) {
+		logger.info("Attempting to cancel appointment ID: {} for patient ID: {}", appointmentId, patientId);
 		return appointmentService.cancelAppointment(appointmentId, patientId, authentication);
 	}
 }

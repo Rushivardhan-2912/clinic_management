@@ -1,13 +1,10 @@
 package com.soprasteria.clinic.appointment.controller;
 
-import com.soprasteria.clinic.appointment.dto.AuthRequest;
+import com.soprasteria.clinic.appointment.dto.AuthRequestDTO;
 import com.soprasteria.clinic.appointment.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -17,7 +14,7 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@RequestBody AuthRequestDTO request) {
         return authService.login(request);
     }
 }

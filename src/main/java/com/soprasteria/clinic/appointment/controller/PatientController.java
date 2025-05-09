@@ -22,6 +22,7 @@ public class PatientController {
 
 	@PostMapping
 	public ResponseEntity<?> registerPatient(@RequestBody Patient patient) {
+		logger.info("Attempting to register new patient with username: {}", patient.getUsername());
 		return patientService.registerPatient(patient);
 	}
 
@@ -29,6 +30,7 @@ public class PatientController {
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> getAllPatients(@RequestParam(defaultValue = "0") int page,
 											@RequestParam(defaultValue = "10") int size) {
+		logger.info("Retrieving all patients with page: {} and size: {}", page, size);
 		return patientService.getAllPatients(page, size);
 	}
 
@@ -37,12 +39,14 @@ public class PatientController {
 	public ResponseEntity<?> updatePatient(@RequestBody PatientDTO patientDTO,
 										   @PathVariable Long id,
 										   Authentication authentication) {
+		logger.info("Attempting to update patient with ID: {} by user: {}", id, authentication.getName());
 		return patientService.updatePatient(patientDTO, id, authentication.getName());
 	}
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<?> deletePatientById(@PathVariable Long id) {
+		logger.info("Attempting to delete patient with ID: {}", id);
 		return patientService.deletePatientById(id);
 	}
 }

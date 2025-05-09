@@ -29,9 +29,8 @@ public class DoctorController {
 	@GetMapping
 	@PreAuthorize("hasAnyRole('ADMIN', 'PATIENT')")
 	public ResponseEntity<?> getAllDoctors(@RequestParam(defaultValue = "0") int page,
-										   @RequestParam(defaultValue = "10") int size,
-										   Authentication authentication) {
-		return doctorService.getAllDoctors(page, size, authentication);
+										   @RequestParam(defaultValue = "10") int size) {
+		return doctorService.getAllDoctors(page, size);
 	}
 
 	@PutMapping("/{id}")
@@ -39,7 +38,7 @@ public class DoctorController {
 	public ResponseEntity<?> updateDoctor(@RequestBody DoctorDTO doctorDTO,
 										  @PathVariable Long id,
 										  Authentication authentication) {
-		return doctorService.updateDoctor(doctorDTO, id, authentication);
+		return doctorService.updateDoctor(doctorDTO, id, authentication.getName());
 	}
 
 	@DeleteMapping("/{id}")
