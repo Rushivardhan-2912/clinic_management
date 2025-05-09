@@ -1,11 +1,11 @@
 package com.soprasteria.clinic.appointment.dto;
 
-public class AuthRequest {
+public class AuthRequestDTO {
 
     private String username;
     private String password;
 
-    public AuthRequest() {
+    public AuthRequestDTO() {
     }
 
     public String getUsername() {
