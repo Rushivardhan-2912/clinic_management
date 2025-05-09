@@ -6,13 +6,13 @@ import org.springframework.security.core.Authentication;
 
 public interface AvailabilityService {
 
-    ResponseEntity<?> addAvailability(AvailabilityDTO availabilityDTO, Long doctorId, Authentication authentication);
+    ResponseEntity<?> addAvailability(AvailabilityDTO availabilityDTO, Long doctorId, String loggedInUsername);
 
-    ResponseEntity<?> getAllAvailabilities(int page, int size);
+    ResponseEntity<?> getAllAvailabilities();
 
-    ResponseEntity<?> getDoctorAvailabilities(Long doctorId, int page, int size);
+    ResponseEntity<?> getDoctorAvailabilities(Long doctorId);
 
-    ResponseEntity<?> updateAvailability(AvailabilityDTO availabilityDTO, Long availabilityId, Authentication authentication);
+    ResponseEntity<?> updateAvailability(AvailabilityDTO availabilityDTO, Long availabilityId, String loggedInUsername);
 
     ResponseEntity<?> deleteAvailability(Long id, String username, Authentication authentication);
 }

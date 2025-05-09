@@ -9,6 +9,7 @@ import com.soprasteria.clinic.appointment.mapper.GlobalMapper;
 import com.soprasteria.clinic.appointment.repo.PatientRepository;
 import com.soprasteria.clinic.appointment.service.PatientService;
 import com.soprasteria.clinic.appointment.util.NullPropertyUtils;
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeanUtils;
@@ -44,10 +45,11 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> registerPatient(Patient patient) {
         try {
             Patient saved = patientRepository.save(patient);
-            logger.info("Patient registered with ID: {}", saved.getPatient_id());
+            logger.info("Patient registered with ID: {}", saved.getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
         } catch (Exception e) {
             logger.error("Error registering patient", e);
@@ -70,6 +72,7 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> updatePatient(PatientDTO updatedPatientDTO, Long patientId, String loggedInUsername) {
         try {
             Patient existingPatient = patientRepository.findById(patientId)
@@ -88,7 +91,7 @@ public class PatientServiceImpl implements PatientService {
             Patient savedPatient = patientRepository.save(existingPatient);
 
             return ResponseEntity.ok(globalMapper.toPatientDTO(savedPatient));
-        } catch (ClinicExceptionHandler.PatientNotFoundException | ClinicExceptionHandler.UnauthorizedAccessException e) {
+        } catch (PatientNotFoundException | ClinicExceptionHandler.UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating patient", e);
@@ -97,6 +100,7 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> deletePatientById(Long id) {
         try {
             Optional<Patient> optionalPatient = patientRepository.findById(id);
@@ -107,6 +111,7 @@ public class PatientServiceImpl implements PatientService {
 
             patientRepository.deleteById(id);
             logger.info("Successfully deleted patient with ID: {}", id);
+
             return ResponseEntity.ok("Patient with ID " + id + " deleted successfully.");
         } catch (PatientNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());

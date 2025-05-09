@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.soprasteria.clinic.appointment.dto.AvailabilityDTO;
 import com.soprasteria.clinic.appointment.entity.Availability;
 import com.soprasteria.clinic.appointment.entity.Doctor;
+import com.soprasteria.clinic.appointment.entity.Status;
 import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.AvailabilityNotFoundException;
 import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.DoctorNotFoundException;
 import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.UnauthorizedAccessException;
@@ -12,13 +13,11 @@ import com.soprasteria.clinic.appointment.repo.AvailabilityRepository;
 import com.soprasteria.clinic.appointment.repo.DoctorRepository;
 import com.soprasteria.clinic.appointment.service.AvailabilityService;
 import com.soprasteria.clinic.appointment.util.NullPropertyUtils;
+import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -44,9 +43,9 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     private DoctorRepository doctorRepository;
 
     @Override
-    public ResponseEntity<?> addAvailability(AvailabilityDTO availabilityDTO, Long doctorId, Authentication authentication) {
+    @Transactional
+    public ResponseEntity<?> addAvailability(AvailabilityDTO availabilityDTO, Long doctorId, String loggedInUsername) {
         try {
-            String loggedInUsername = authentication.getName();
             Doctor doctor = doctorRepository.findById(doctorId)
                     .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
 
@@ -54,16 +53,19 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 throw new UnauthorizedAccessException("You are not authorized to add availability for this doctor.");
             }
 
-            if (availabilityDTO.getAvailability_startTime() != null && availabilityDTO.getAvailability_endTime() != null &&
-                    availabilityDTO.getAvailability_startTime().isAfter(availabilityDTO.getAvailability_endTime())) {
+            if (availabilityDTO.getAvailabilityStartTime() != null && availabilityDTO.getAvailabilityEndTime() != null &&
+                    availabilityDTO.getAvailabilityStartTime().isAfter(availabilityDTO.getAvailabilityEndTime())) {
                 return ResponseEntity.badRequest().body("Start time cannot be after end time.");
             }
 
             Availability availability = globalMapper.toAvailabilityEntity(availabilityDTO, doctor);
-            availability.setAvailability_status("Available");
+            availability.setStatus(Status.AVAILABLE);
 
             Availability saved = availabilityRepository.save(availability);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(globalMapper.toAvailabilityDTO(saved));
+        } catch (UnauthorizedAccessException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error adding availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
@@ -71,11 +73,12 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     }
 
     @Override
-    public ResponseEntity<?> getAllAvailabilities(int page, int size) {
+    public ResponseEntity<?> getAllAvailabilities() {
         try {
-            Pageable pageable = PageRequest.of(page, size);
-            Page<Availability> availabilityPage = availabilityRepository.findAll(pageable);
-            List<AvailabilityDTO> dtos = availabilityPage.map(globalMapper::toAvailabilityDTO).getContent();
+            List<Availability> availabilities = availabilityRepository.findAll();
+            List<AvailabilityDTO> dtos = availabilities.stream()
+                    .map(globalMapper::toAvailabilityDTO)
+                    .toList();
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             logger.error("Error retrieving availabilities: {}", e.getMessage());
@@ -84,11 +87,12 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     }
 
     @Override
-    public ResponseEntity<?> getDoctorAvailabilities(Long doctorId, int page, int size) {
+    public ResponseEntity<?> getDoctorAvailabilities(Long doctorId) {
         try {
-            Pageable pageable = PageRequest.of(page, size);
-            Page<Availability> availabilityPage = availabilityRepository.findBydoctorId(doctorId, pageable);
-            List<AvailabilityDTO> dtos = availabilityPage.map(globalMapper::toAvailabilityDTO).getContent();
+            List<Availability> availabilities = availabilityRepository.findByDoctorId(doctorId);
+            List<AvailabilityDTO> dtos = availabilities.stream()
+                    .map(globalMapper::toAvailabilityDTO)
+                    .toList();
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             logger.error("Error retrieving doctor availabilities: {}", e.getMessage());
@@ -96,10 +100,11 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         }
     }
 
+
     @Override
-    public ResponseEntity<?> updateAvailability(AvailabilityDTO availabilityDTO, Long availabilityId, Authentication authentication) {
+    @Transactional
+    public ResponseEntity<?> updateAvailability(AvailabilityDTO availabilityDTO, Long availabilityId, String loggedInUsername) {
         try {
-            String loggedInUsername = authentication.getName();
             Availability availability = availabilityRepository.findById(availabilityId)
                     .orElseThrow(() -> new AvailabilityNotFoundException("Availability not found with ID: " + availabilityId));
 
@@ -108,18 +113,22 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 throw new UnauthorizedAccessException("You are not authorized to update this availability.");
             }
 
-            if (availabilityDTO.getAvailability_startTime() != null && availabilityDTO.getAvailability_endTime() != null &&
-                    availabilityDTO.getAvailability_startTime().isAfter(availabilityDTO.getAvailability_endTime())) {
+            if (availabilityDTO.getAvailabilityStartTime() != null && availabilityDTO.getAvailabilityEndTime() != null &&
+                    availabilityDTO.getAvailabilityStartTime().isAfter(availabilityDTO.getAvailabilityEndTime())) {
                 return ResponseEntity.badRequest().body("Start time cannot be after end time.");
             }
 
             BeanUtils.copyProperties(availabilityDTO, availability, NullPropertyUtils.getNullPropertyNames(availabilityDTO));
             availability.setDoctor(doctor);
-            availability.setAvailability_id(availabilityId);
-            availability.setAvailability_status("Available");
+            availability.setId(availabilityId);
+            availability.setStatus(Status.AVAILABLE);
 
             Availability updated = availabilityRepository.save(availability);
             return ResponseEntity.ok(globalMapper.toAvailabilityDTO(updated));
+        } catch (UnauthorizedAccessException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (AvailabilityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
@@ -127,6 +136,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     }
 
     @Override
+    @Transactional
     public ResponseEntity<?> deleteAvailability(Long id, String username, Authentication authentication) {
         try {
             validateLoggedInUser(username, authentication);
@@ -137,12 +147,18 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             Doctor doctor = doctorRepository.findByUsername(username)
                     .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with username: " + username));
 
-            if (!availability.getDoctor().getDoctor_id().equals(doctor.getDoctor_id())) {
+            if (!availability.getDoctor().getId().equals(doctor.getId())) {
                 throw new UnauthorizedAccessException("You are not authorized to delete this availability");
             }
 
             availabilityRepository.deleteById(id);
             return ResponseEntity.ok("Availability deleted successfully with ID: " + id);
+        } catch (UnauthorizedAccessException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (AvailabilityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (DoctorNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error deleting availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
