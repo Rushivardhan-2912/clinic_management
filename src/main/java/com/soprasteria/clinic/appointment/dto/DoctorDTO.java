@@ -3,9 +3,15 @@ package com.soprasteria.clinic.appointment.dto;
 public class DoctorDTO {
 
 	private Long doctorId;
+
 	private String doctorName;
+
 	private String doctorSpecialization;
+
 	private String username;
+
+	public DoctorDTO() {
+	}
 
 	public Long getDoctorId() {
 		return doctorId;

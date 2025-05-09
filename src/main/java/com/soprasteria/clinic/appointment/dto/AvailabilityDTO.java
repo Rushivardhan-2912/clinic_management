@@ -12,6 +12,9 @@ public class AvailabilityDTO {
 	private String availabilityStatus;
 	private DoctorDTO doctor;
 
+	public AvailabilityDTO() {
+	}
+
 	public Long getAvailabilityId() {
 		return availabilityId;
 	}

@@ -5,7 +5,9 @@ public class AuthRequest {
     private String username;
     private String password;
 
-    // Getters and Setters
+    public AuthRequest() {
+    }
+
     public String getUsername() {
         return username;
     }
