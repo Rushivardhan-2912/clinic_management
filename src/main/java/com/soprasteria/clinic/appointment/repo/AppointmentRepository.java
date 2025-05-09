@@ -1,9 +1,6 @@
 package com.soprasteria.clinic.appointment.repo;
 
 import com.soprasteria.clinic.appointment.entity.Appointment;
-import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -12,30 +9,29 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-	Page<Appointment> findAll(Pageable pageable);
+	@Query("SELECT a FROM Appointment a WHERE a.patient.id = :patientId")
+	List<Appointment> findAppointmentsByPatientId(@Param("patientId") Long patientId);
 
-	@Query("SELECT a FROM Appointment a WHERE a.patient.patient_id = :patientId")
-	Page<Appointment> findAppointmentsByPatientId(Long patientId, Pageable pageable);
-
-	@Query("SELECT a FROM Appointment a WHERE a.doctor.doctor_id = :doctorId")
-	Page<Appointment> findAppointmentsByDoctorId(Long doctorId, Pageable pageable);
+	@Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId")
+	List<Appointment> findAppointmentsByDoctorId(@Param("doctorId") Long doctorId);
 
 	@Query("SELECT COUNT(a) > 0 FROM Appointment a WHERE " +
-			"a.doctor.doctor_id = :doctorId AND " +
-			"a.appointment_date = :date AND " +
-			"(a.appointment_startTime < :endTime AND a.appointment_endTime > :startTime) AND " +
-			"a.appointment_status = 'Appointment_Booked'")
+			"a.doctor.id = :doctorId AND " +
+			"a.appointmentDate = :date AND " +
+			"(a.appointmentStartTime < :endTime AND a.appointmentEndTime > :startTime) AND " +
+			"a.appointmentStatus = Status.BOOKED")
 	boolean existsBookedAppointment(@Param("doctorId") Long doctorId,
-                                    @Param("date") LocalDate date,
-                                    @Param("startTime") LocalTime startTime,
-                                    @Param("endTime") LocalTime endTime);
+									@Param("date") LocalDate date,
+									@Param("startTime") LocalTime startTime,
+									@Param("endTime") LocalTime endTime);
 
 	@Modifying
-	@Transactional
-	@Query("DELETE FROM Appointment a WHERE a.appointment_date < :today")
+	@Query("DELETE FROM Appointment a WHERE a.appointmentDate < :today")
 	void deletePastData(@Param("today") LocalDate today);
 }
+

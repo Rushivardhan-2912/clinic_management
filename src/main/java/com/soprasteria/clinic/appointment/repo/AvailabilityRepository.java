@@ -1,9 +1,7 @@
 package com.soprasteria.clinic.appointment.repo;
 
 import com.soprasteria.clinic.appointment.entity.Availability;
-import jakarta.transaction.Transactional;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.soprasteria.clinic.appointment.entity.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,15 +16,15 @@ import java.util.List;
 public interface AvailabilityRepository extends JpaRepository<Availability, Long> {
 
     @Query("SELECT a FROM Availability a WHERE a.doctor.id = :doctorId")
-    Page<Availability> findBydoctorId(@Param("doctorId") Long doctorId, Pageable pageable);
+    List<Availability> findByDoctorId(@Param("doctorId") Long doctorId);
 
     // Check if a time slot is available for a doctor
     @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END " +
             "FROM Availability a " +
-            "WHERE a.doctor.doctor_id = :doctorId " +
-            "AND a.availability_date = :date " +
-            "AND ((a.availability_startTime <= :startTime AND a.availability_endTime > :startTime) " +
-            "OR (a.availability_startTime < :endTime AND a.availability_endTime >= :endTime))")
+            "WHERE a.doctor.id = :doctorId " +
+            "AND a.availabilityDate = :date " +
+            "AND ((a.availabilityStartTime <= :startTime AND a.availabilityEndTime > :startTime) " +
+            "OR (a.availabilityStartTime < :endTime AND a.availabilityEndTime >= :endTime))")
     boolean isTimeSlotAvailable(@Param("doctorId") Long doctorId,
                                 @Param("date") LocalDate date,
                                 @Param("startTime") LocalTime startTime,
@@ -34,10 +32,10 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
 
     @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END " +
             "FROM Availability a " +
-            "WHERE a.doctor.doctor_id = :doctorId " +
-            "AND a.availability_date = :date " +
-            "AND a.availability_startTime = :startTime " +
-            "AND a.availability_endTime = :endTime")
+            "WHERE a.doctor.id = :doctorId " +
+            "AND a.availabilityDate = :date " +
+            "AND a.availabilityStartTime = :startTime " +
+            "AND a.availabilityEndTime = :endTime")
     boolean existsByDoctorAndDateAndTime(@Param("doctorId") Long doctorId,
                                          @Param("date") LocalDate date,
                                          @Param("startTime") LocalTime startTime,
@@ -45,10 +43,10 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
 
     // Find overlapping availability slots for a doctor
     @Query("SELECT a FROM Availability a " +
-            "WHERE a.doctor.doctor_id = :doctorId " +
-            "AND a.availability_date = :date " +
-            "AND (a.availability_startTime < :endTime " +
-            "AND a.availability_endTime > :startTime)")
+            "WHERE a.doctor.id = :doctorId " +
+            "AND a.availabilityDate = :date " +
+            "AND (a.availabilityStartTime < :endTime " +
+            "AND a.availabilityEndTime > :startTime)")
     List<Availability> findOverlappingAvailabilities(@Param("doctorId") Long doctorId,
                                                      @Param("date") LocalDate date,
                                                      @Param("startTime") LocalTime startTime,
@@ -56,31 +54,28 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
 
     // Update availability status for a specific time slot
     @Modifying
-    @Query("UPDATE Availability a " +
-            "SET a.availability_status = :status, a.availability_date = :date " +
-            "WHERE a.doctor.doctor_id = :doctorId " +
-            "AND a.availability_startTime = :startTime " +
-            "AND a.availability_endTime = :endTime")
+    @Query("UPDATE Availability a SET a.availabilityStatus = :status, a.availabilityDate = :date " +
+            "WHERE a.doctor.id = :doctorId " +
+            "AND a.availabilityStartTime = :startTime " +
+            "AND a.availabilityEndTime = :endTime")
     int updateAvailability(@Param("doctorId") Long doctorId,
                            @Param("startTime") LocalTime startTime,
                            @Param("endTime") LocalTime endTime,
                            @Param("date") LocalDate date,
-                           @Param("status") String status);
+                           @Param("status") Status status);
 
     // Find availability by doctor, date, and exact time slot
     @Query("SELECT a FROM Availability a " +
-            "WHERE a.doctor.doctor_id = :doctorId " +
-            "AND a.availability_date = :appointmentDate " +
-            "AND a.availability_startTime = :startTime " +
-            "AND a.availability_endTime = :endTime")
+            "WHERE a.doctor.id = :doctorId " +
+            "AND a.availabilityDate = :appointmentDate " +
+            "AND a.availabilityStartTime = :startTime " +
+            "AND a.availabilityEndTime = :endTime")
     Availability findByDoctorAndDateAndTime(@Param("doctorId") Long doctorId,
                                             @Param("appointmentDate") LocalDate appointmentDate,
                                             @Param("startTime") LocalTime startTime,
                                             @Param("endTime") LocalTime endTime);
 
     @Modifying
-    @Transactional
-    @Query("DELETE FROM Availability e WHERE e.availability_date < :today")
+    @Query("DELETE FROM Availability e WHERE e.availabilityDate < :today")
     void deletePastData(@Param("today") LocalDate today);
-
 }
