@@ -23,8 +23,8 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
             "FROM Availability a " +
             "WHERE a.doctor.id = :doctorId " +
             "AND a.availabilityDate = :date " +
-            "AND ((a.availabilityStartTime <= :startTime AND a.availabilityEndTime > :startTime) " +
-            "OR (a.availabilityStartTime < :endTime AND a.availabilityEndTime >= :endTime))")
+            "AND a.availabilityStartTime <= :startTime " +
+            "AND a.availabilityEndTime >= :endTime")
     boolean isTimeSlotAvailable(@Param("doctorId") Long doctorId,
                                 @Param("date") LocalDate date,
                                 @Param("startTime") LocalTime startTime,
