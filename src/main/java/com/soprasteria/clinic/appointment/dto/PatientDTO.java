@@ -2,7 +2,7 @@ package com.soprasteria.clinic.appointment.dto;
 
 public class PatientDTO {
 
-	private Long patientId;
+	private Long id;
 	private String patientName;
 	private String patientEmail;
 	private String patientPhoneNumber;
@@ -17,12 +17,12 @@ public class PatientDTO {
 		this.username = username;
 	}
 
-	public Long getPatientId() {
-		return patientId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setPatientId(Long patientId) {
-		this.patientId = patientId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public String getPatientName() {

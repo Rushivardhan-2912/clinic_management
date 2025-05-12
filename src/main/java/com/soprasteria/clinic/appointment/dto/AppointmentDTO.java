@@ -1,26 +1,28 @@
 package com.soprasteria.clinic.appointment.dto;
 
 
+import com.soprasteria.clinic.appointment.entity.Status;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class AppointmentDTO {
 
-	private Long appointmentId;
+	private Long id;
 	private LocalDate appointmentDate;
     private LocalTime appointmentStartTime;
     private LocalTime appointmentEndTime;
-    private String appointmentStatus;
+    private Status appointmentStatus;
     
     private PatientDTO patient;
     private DoctorDTO doctor;
 
-	public Long getAppointmentId() {
-		return appointmentId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setAppointmentId(Long appointmentId) {
-		this.appointmentId = appointmentId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public LocalDate getAppointmentDate() {
@@ -47,11 +49,11 @@ public class AppointmentDTO {
 		this.appointmentEndTime = appointmentEndTime;
 	}
 
-	public String getAppointmentStatus() {
+	public Status getAppointmentStatus() {
 		return appointmentStatus;
 	}
 
-	public void setAppointmentStatus(String appointmentStatus) {
+	public void setAppointmentStatus(Status appointmentStatus) {
 		this.appointmentStatus = appointmentStatus;
 	}
 

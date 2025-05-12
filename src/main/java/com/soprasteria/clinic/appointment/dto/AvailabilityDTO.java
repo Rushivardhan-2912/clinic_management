@@ -1,26 +1,28 @@
 package com.soprasteria.clinic.appointment.dto;
 
+import com.soprasteria.clinic.appointment.entity.Status;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class AvailabilityDTO {
 
-	private Long availabilityId;
+	private Long id;
 	private LocalDate availabilityDate;
 	private LocalTime availabilityStartTime;
 	private LocalTime availabilityEndTime;
-	private String availabilityStatus;
+	private Status availabilityStatus;
 	private DoctorDTO doctor;
 
 	public AvailabilityDTO() {
 	}
 
-	public Long getAvailabilityId() {
-		return availabilityId;
+	public Long getId() {
+		return id;
 	}
 
-	public void setAvailabilityId(Long availabilityId) {
-		this.availabilityId = availabilityId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public LocalDate getAvailabilityDate() {
@@ -47,11 +49,11 @@ public class AvailabilityDTO {
 		this.availabilityEndTime = availabilityEndTime;
 	}
 
-	public String getAvailabilityStatus() {
+	public Status getAvailabilityStatus() {
 		return availabilityStatus;
 	}
 
-	public void setAvailabilityStatus(String availabilityStatus) {
+	public void setAvailabilityStatus(Status availabilityStatus) {
 		this.availabilityStatus = availabilityStatus;
 	}
 
