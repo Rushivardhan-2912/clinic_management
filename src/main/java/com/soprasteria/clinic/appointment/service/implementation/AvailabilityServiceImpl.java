@@ -23,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
@@ -53,24 +55,41 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 throw new UnauthorizedAccessException("You are not authorized to add availability for this doctor.");
             }
 
-            if (availabilityDTO.getAvailabilityStartTime() != null && availabilityDTO.getAvailabilityEndTime() != null &&
-                    availabilityDTO.getAvailabilityStartTime().isAfter(availabilityDTO.getAvailabilityEndTime())) {
-                return ResponseEntity.badRequest().body("Start time cannot be after end time.");
+            LocalTime startTime = availabilityDTO.getAvailabilityStartTime();
+            LocalTime endTime = availabilityDTO.getAvailabilityEndTime();
+            LocalDate date = availabilityDTO.getAvailabilityDate();
+
+            if (startTime != null && endTime != null && !endTime.isAfter(startTime)) {
+                return ResponseEntity.badRequest().body("Start time must be before end time.");
+            }
+
+            // Check for existing availability to prevent duplicates
+            boolean exists = availabilityRepository.existsByDoctorAndDateAndTime(
+                    doctorId, date, startTime, endTime
+            );
+            if (exists) {
+                return ResponseEntity.status(HttpStatus.CONFLICT)
+                        .body("This availability slot already exists.");
             }
 
             Availability availability = globalMapper.toAvailabilityEntity(availabilityDTO, doctor);
-            availability.setStatus(Status.AVAILABLE);
+            availability.setAvailabilityStatus(Status.AVAILABLE);
 
             Availability saved = availabilityRepository.save(availability);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(globalMapper.toAvailabilityDTO(saved));
+
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (DoctorNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error adding availability: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error occurred while adding availability.");
         }
     }
+
 
     @Override
     public ResponseEntity<?> getAllAvailabilities() {
@@ -121,7 +140,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             BeanUtils.copyProperties(availabilityDTO, availability, NullPropertyUtils.getNullPropertyNames(availabilityDTO));
             availability.setDoctor(doctor);
             availability.setId(availabilityId);
-            availability.setStatus(Status.AVAILABLE);
+            availability.setAvailabilityStatus( Status.AVAILABLE);
 
             Availability updated = availabilityRepository.save(availability);
             return ResponseEntity.ok(globalMapper.toAvailabilityDTO(updated));

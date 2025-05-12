@@ -53,8 +53,8 @@ public class AppointmentServiceImpl implements AppointmentService {
                 throw new UnauthorizedAccessException("You are not authorized to book an appointment for another patient.");
             }
 
-            Doctor doctor = doctorRepository.findById(appointmentDTO.getDoctor().getDoctorId())
-                    .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + appointmentDTO.getDoctor().getDoctorId()));
+            Doctor doctor = doctorRepository.findById(appointmentDTO.getDoctor().getId())
+                    .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + appointmentDTO.getDoctor().getId()));
 
             LocalDate date = appointmentDTO.getAppointmentDate();
             LocalTime startTime = appointmentDTO.getAppointmentStartTime();
@@ -200,7 +200,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             old.setAvailabilityDate(existing.getAppointmentDate());
             old.setAvailabilityStartTime(existing.getAppointmentStartTime());
             old.setAvailabilityEndTime(existing.getAppointmentEndTime());
-            old.setStatus(Status.AVAILABLE);
+            old.setAvailabilityStatus(Status.AVAILABLE);
             availabilityRepository.save(old);
 
             existing.setAppointmentDate(newDate);
@@ -261,7 +261,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         Availability availability = availabilityRepository.findByDoctorAndDateAndTime(doctorId, date, start, end);
         if (availability != null) {
-            availability.setStatus(Status.AVAILABLE);
+            availability.setAvailabilityStatus(Status.AVAILABLE);
             availabilityRepository.save(availability);
         } else {
             Availability newAvailability = new Availability();
@@ -269,7 +269,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             newAvailability.setAvailabilityDate(date);
             newAvailability.setAvailabilityStartTime(start);
             newAvailability.setAvailabilityEndTime(end);
-            newAvailability.setStatus(Status.AVAILABLE);
+            newAvailability.setAvailabilityStatus(Status.AVAILABLE);
             availabilityRepository.save(newAvailability);
         }
     }
@@ -277,14 +277,13 @@ public class AppointmentServiceImpl implements AppointmentService {
     private void handleOverlappingAvailabilities(Doctor doctor, LocalDate date, LocalTime startTime, LocalTime endTime) {
         List<Availability> overlaps = availabilityRepository.findOverlappingAvailabilities(doctor.getId(), date, startTime, endTime);
         for (Availability a : overlaps) {
-            // Exact match: delete directly
             if (a.getAvailabilityStartTime().equals(startTime) && a.getAvailabilityEndTime().equals(endTime)) {
+                // Exact match — delete directly
                 availabilityRepository.delete(a);
                 continue;
             }
 
-            boolean hasSplit = false;
-
+            // Split before
             if (a.getAvailabilityStartTime().isBefore(startTime)) {
                 LocalTime bs = a.getAvailabilityStartTime();
                 LocalTime be = startTime;
@@ -295,12 +294,12 @@ public class AppointmentServiceImpl implements AppointmentService {
                     before.setAvailabilityDate(date);
                     before.setAvailabilityStartTime(bs);
                     before.setAvailabilityEndTime(be);
-                    before.setStatus(Status.AVAILABLE);
+                    before.setAvailabilityStatus(Status.AVAILABLE);
                     availabilityRepository.save(before);
-                    hasSplit = true;
                 }
             }
 
+            // Split after
             if (a.getAvailabilityEndTime().isAfter(endTime)) {
                 LocalTime as = endTime;
                 LocalTime ae = a.getAvailabilityEndTime();
@@ -311,15 +310,13 @@ public class AppointmentServiceImpl implements AppointmentService {
                     after.setAvailabilityDate(date);
                     after.setAvailabilityStartTime(as);
                     after.setAvailabilityEndTime(ae);
-                    after.setStatus(Status.AVAILABLE);
+                    after.setAvailabilityStatus(Status.AVAILABLE);
                     availabilityRepository.save(after);
-                    hasSplit = true;
                 }
             }
 
-            if (hasSplit) {
-                availabilityRepository.delete(a);
-            }
+            a.setAvailabilityStatus(Status.BOOKED);
         }
     }
+
 }
