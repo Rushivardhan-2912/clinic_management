@@ -24,6 +24,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static com.soprasteria.clinic.appointment.util.GenericMessages.DOCTOR_NOT_FOUND;
+import static com.soprasteria.clinic.appointment.util.GenericMessages.UNAUTHORIZED;
+
 @Service
 public class DoctorServiceImpl implements DoctorService {
 
@@ -44,7 +47,7 @@ public class DoctorServiceImpl implements DoctorService {
             logger.info("Finding doctor with username: {}", username);
             return doctorRepository.findByUsername(username)
                     .<ResponseEntity<?>>map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body("Doctor not found"));
+                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format(DOCTOR_NOT_FOUND,username)));
         } catch (Exception e) {
             logger.error("Error finding doctor", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve doctor");
@@ -85,12 +88,12 @@ public class DoctorServiceImpl implements DoctorService {
             Doctor existingDoctor = doctorRepository.findById(doctorId)
                     .orElseThrow(() -> {
                         logger.error("Doctor not found with ID: {}", doctorId);
-                        return new DoctorNotFoundException("Doctor not found with ID: " + doctorId);
+                        return new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND,doctorId));
                     });
 
             if (!existingDoctor.getUsername().equals(loginUsername)) {
                 logger.warn("Unauthorized update attempt by user: {}", loginUsername);
-                return new ResponseEntity<>(new UnauthorizedAccessException("Unauthorized update attempt"), HttpStatus.UNAUTHORIZED);
+                return new ResponseEntity<>(new UnauthorizedAccessException(UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
             }
 
             BeanUtils.copyProperties(updatedDoctorDTO, existingDoctor, NullPropertyUtils.getNullPropertyNames(updatedDoctorDTO));
@@ -111,7 +114,7 @@ public class DoctorServiceImpl implements DoctorService {
         try {
             if (!doctorRepository.existsById(id)) {
                 logger.error("Doctor not found for deletion, ID: {}", id);
-                throw new ClinicExceptionHandler.DoctorNotFoundException("Doctor with ID " + id + " not found");
+                throw new ClinicExceptionHandler.DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND,id));
             }
 
             doctorRepository.deleteById(id);

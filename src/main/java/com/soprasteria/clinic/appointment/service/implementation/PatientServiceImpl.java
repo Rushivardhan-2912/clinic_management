@@ -24,6 +24,8 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+import static com.soprasteria.clinic.appointment.util.GenericMessages.*;
+
 @Service
 public class PatientServiceImpl implements PatientService {
 
@@ -78,12 +80,12 @@ public class PatientServiceImpl implements PatientService {
             Patient existingPatient = patientRepository.findById(patientId)
                     .orElseThrow(() -> {
                         logger.error("Patient not found with ID: {}", patientId);
-                        return new PatientNotFoundException("Patient not found with ID: " + patientId);
+                        return new PatientNotFoundException(String.format(PATIENT_NOT_FOUND,patientId));
                     });
 
             if (!existingPatient.getUsername().equals(loggedInUsername)) {
                 logger.warn("User {} attempted to update data for {}", loggedInUsername, existingPatient.getUsername());
-                throw new ClinicExceptionHandler.UnauthorizedAccessException("Unauthorized update attempt");
+                throw new ClinicExceptionHandler.UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             logger.info("Updating patient data for ID: {}", patientId);
@@ -91,8 +93,10 @@ public class PatientServiceImpl implements PatientService {
             Patient savedPatient = patientRepository.save(existingPatient);
 
             return ResponseEntity.ok(globalMapper.toPatientDTO(savedPatient));
-        } catch (ClinicExceptionHandler.PatientNotFoundException | ClinicExceptionHandler.UnauthorizedAccessException e) {
+        } catch (ClinicExceptionHandler.UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+        } catch (PatientNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating patient", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update patient");
@@ -106,7 +110,7 @@ public class PatientServiceImpl implements PatientService {
             Optional<Patient> optionalPatient = patientRepository.findById(id);
             if (!optionalPatient.isPresent()) {
                 logger.error("Patient not found with ID: {}", id);
-                throw new PatientNotFoundException("Patient with ID " + id + " not found");
+                throw new PatientNotFoundException(String.format(PATIENT_NOT_FOUND,id));
             }
 
             patientRepository.deleteById(id);

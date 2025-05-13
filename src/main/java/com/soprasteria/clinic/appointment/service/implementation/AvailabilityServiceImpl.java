@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.soprasteria.clinic.appointment.dto.AvailabilityDTO;
 import com.soprasteria.clinic.appointment.entity.Availability;
 import com.soprasteria.clinic.appointment.entity.Doctor;
-import com.soprasteria.clinic.appointment.entity.Status;
 import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.AvailabilityNotFoundException;
 import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.DoctorNotFoundException;
 import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.UnauthorizedAccessException;
@@ -13,6 +12,7 @@ import com.soprasteria.clinic.appointment.repo.AvailabilityRepository;
 import com.soprasteria.clinic.appointment.repo.DoctorRepository;
 import com.soprasteria.clinic.appointment.service.AvailabilityService;
 import com.soprasteria.clinic.appointment.util.NullPropertyUtils;
+import com.soprasteria.clinic.appointment.util.Status;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
+import static com.soprasteria.clinic.appointment.util.GenericMessages.*;
 
 @Service
 public class AvailabilityServiceImpl implements AvailabilityService {
@@ -49,10 +51,10 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     public ResponseEntity<?> addAvailability(AvailabilityDTO availabilityDTO, Long doctorId, String loggedInUsername) {
         try {
             Doctor doctor = doctorRepository.findById(doctorId)
-                    .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
+                    .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND,doctorId)));
 
             if (!doctor.getUsername().equals(loggedInUsername)) {
-                throw new UnauthorizedAccessException("You are not authorized to add availability for this doctor.");
+                throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             LocalTime startTime = availabilityDTO.getAvailabilityStartTime();
@@ -67,6 +69,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             boolean exists = availabilityRepository.existsByDoctorAndDateAndTime(
                     doctorId, date, startTime, endTime
             );
+
             if (exists) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body("This availability slot already exists.");
@@ -125,11 +128,11 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     public ResponseEntity<?> updateAvailability(AvailabilityDTO availabilityDTO, Long availabilityId, String loggedInUsername) {
         try {
             Availability availability = availabilityRepository.findById(availabilityId)
-                    .orElseThrow(() -> new AvailabilityNotFoundException("Availability not found with ID: " + availabilityId));
+                    .orElseThrow(() -> new AvailabilityNotFoundException(String.format(AVAILABILITY_NOT_FOUND,availabilityId)));
 
             Doctor doctor = availability.getDoctor();
             if (!doctor.getUsername().equals(loggedInUsername)) {
-                throw new UnauthorizedAccessException("You are not authorized to update this availability.");
+                throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             if (availabilityDTO.getAvailabilityStartTime() != null && availabilityDTO.getAvailabilityEndTime() != null &&
@@ -161,13 +164,13 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             validateLoggedInUser(username, authentication);
 
             Availability availability = availabilityRepository.findById(id)
-                    .orElseThrow(() -> new AvailabilityNotFoundException("Availability not found with ID: " + id));
+                    .orElseThrow(() -> new AvailabilityNotFoundException(String.format(AVAILABILITY_NOT_FOUND,id)));
 
             Doctor doctor = doctorRepository.findByUsername(username)
-                    .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with username: " + username));
+                    .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND,username)));
 
             if (!availability.getDoctor().getId().equals(doctor.getId())) {
-                throw new UnauthorizedAccessException("You are not authorized to delete this availability");
+                throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             availabilityRepository.deleteById(id);
@@ -186,7 +189,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     private void validateLoggedInUser(String username, Authentication authentication) {
         if (authentication == null || !authentication.getName().equals(username)) {
-            throw new UnauthorizedAccessException("You are not authorized to perform this operation.");
+            throw new UnauthorizedAccessException(UNAUTHORIZED);
         }
     }
 }

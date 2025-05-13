@@ -8,7 +8,7 @@ public interface AppointmentService {
 
     ResponseEntity<?> bookAppointment(AppointmentDTO appointmentDTO, Long id, String loggedInUsername);
 
-    ResponseEntity<?> viewAllAppointmentsForPatient(Long patientId , Authentication authentication);
+    ResponseEntity<?> viewAllAppointmentsForPatient(Long patientId, Authentication authentication);
 
     ResponseEntity<?> viewAllAppointmentsForDoctor(Long doctorId, Authentication authentication);
 

@@ -9,6 +9,7 @@ import com.soprasteria.clinic.appointment.repo.AvailabilityRepository;
 import com.soprasteria.clinic.appointment.repo.DoctorRepository;
 import com.soprasteria.clinic.appointment.repo.PatientRepository;
 import com.soprasteria.clinic.appointment.service.AppointmentService;
+import com.soprasteria.clinic.appointment.util.Status;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
+import static com.soprasteria.clinic.appointment.util.GenericMessages.*;
 
 @Service
 public class AppointmentServiceImpl implements AppointmentService {
@@ -47,31 +50,31 @@ public class AppointmentServiceImpl implements AppointmentService {
     public ResponseEntity<?> bookAppointment(AppointmentDTO appointmentDTO, Long patientId, String loggedInUsername) {
         try {
             Patient patient = patientRepository.findById(patientId)
-                    .orElseThrow(() -> new PatientNotFoundException("Patient with ID '" + patientId + "' not found"));
+                    .orElseThrow(() -> new PatientNotFoundException(String.format(PATIENT_NOT_FOUND, patientId)));
 
             if (!loggedInUsername.equals(patient.getUsername())) {
-                throw new UnauthorizedAccessException("You are not authorized to book an appointment for another patient.");
+                throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             Doctor doctor = doctorRepository.findById(appointmentDTO.getDoctor().getId())
-                    .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + appointmentDTO.getDoctor().getId()));
+                    .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND, appointmentDTO.getDoctor().getId())));
 
             LocalDate date = appointmentDTO.getAppointmentDate();
             LocalTime startTime = appointmentDTO.getAppointmentStartTime();
             LocalTime endTime = appointmentDTO.getAppointmentEndTime();
 
             if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
-                throw new InvalidTimeSlotException("Invalid appointment time range.");
+                throw new InvalidTimeSlotException(INVALID_TIME_RANGE);
             }
 
             boolean free = availabilityRepository.isTimeSlotAvailable(doctor.getId(), date, startTime, endTime);
             if (!free) {
-                throw new InvalidTimeSlotException("The selected time slot is not available.");
+                throw new InvalidTimeSlotException(TIME_SLOT_NOT_AVAILABLE);
             }
 
             boolean alreadyBooked = appointmentRepository.existsBookedAppointment(doctor.getId(), date, startTime, endTime);
             if (alreadyBooked) {
-                throw new InvalidTimeSlotException("Appointment already booked for the same slot.");
+                throw new InvalidTimeSlotException(TIME_SLOT_ALREADY_BOOKED);
             }
 
             Appointment appointment = globalMapper.toAppointmentEntity(appointmentDTO, doctor, patient);
@@ -79,6 +82,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             Appointment saved = appointmentRepository.save(appointment);
 
             handleOverlappingAvailabilities(doctor, date, startTime, endTime);
+
             return ResponseEntity.status(HttpStatus.CREATED).body(globalMapper.toAppointmentDTO(saved));
         } catch (PatientNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
@@ -87,7 +91,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (InvalidTimeSlotException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error booking appointment", e);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -102,10 +106,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
             Patient patient = patientRepository.findById(patientId)
-                    .orElseThrow(() -> new PatientNotFoundException("Patient not found with ID: " + patientId));
+                    .orElseThrow(() -> new PatientNotFoundException(String.format(PATIENT_NOT_FOUND, patientId)));
 
             if (!(patient.getUsername().equals(loginUsername) || isAdmin)) {
-                throw new UnauthorizedAccessException("You are not authorized to view these appointments.");
+                throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             List<Appointment> appointments = appointmentRepository.findAppointmentsByPatientId(patientId);
@@ -132,10 +136,10 @@ public class AppointmentServiceImpl implements AppointmentService {
                     .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
 
             Doctor doctor = doctorRepository.findById(doctorId)
-                    .orElseThrow(() -> new DoctorNotFoundException("Doctor not found with ID: " + doctorId));
+                    .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND, doctorId)));
 
             if (!(doctor.getUsername().equals(loginUsername) || isAdmin)) {
-                throw new UnauthorizedAccessException("You are not authorized to view these appointments.");
+                throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             List<Appointment> appointments = appointmentRepository.findAppointmentsByDoctorId(doctorId);
@@ -173,11 +177,11 @@ public class AppointmentServiceImpl implements AppointmentService {
     public ResponseEntity<?> rescheduleAppointment(AppointmentDTO appointmentDTO, Long appointmentId, String loggedInUsername) {
         try {
             Appointment existing = appointmentRepository.findById(appointmentId)
-                    .orElseThrow(() -> new IllegalArgumentException("Appointment not found with ID: " + appointmentId));
+                    .orElseThrow(() -> new IllegalArgumentException(String.format(APPOINTMENT_NOT_FOUND, appointmentId)));
 
             Patient patient = existing.getPatient();
             if (!patient.getUsername().equals(loggedInUsername)) {
-                throw new UnauthorizedAccessException("You are not authorized to reschedule this appointment.");
+                throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             LocalDate newDate = appointmentDTO.getAppointmentDate();
@@ -185,14 +189,14 @@ public class AppointmentServiceImpl implements AppointmentService {
             LocalTime newEnd = appointmentDTO.getAppointmentEndTime();
 
             if (newStart == null || newEnd == null || !newEnd.isAfter(newStart)) {
-                throw new InvalidTimeSlotException("Invalid reschedule time range.");
+                throw new InvalidTimeSlotException(INVALID_TIME_RANGE);
             }
 
             Doctor doctor = existing.getDoctor();
             boolean available = availabilityRepository.isTimeSlotAvailable(doctor.getId(), newDate, newStart, newEnd);
             boolean alreadyBooked = appointmentRepository.existsBookedAppointment(doctor.getId(), newDate, newStart, newEnd);
             if (!available || alreadyBooked) {
-                throw new InvalidTimeSlotException("The selected reschedule time slot is not available.");
+                throw new InvalidTimeSlotException(TIME_SLOT_NOT_AVAILABLE);
             }
 
             Availability old = new Availability();
@@ -229,14 +233,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         try {
             String username = authentication.getName();
             Appointment appointment = appointmentRepository.findById(appointmentId)
-                    .orElseThrow(() -> new IllegalArgumentException("Appointment not found with ID: " + appointmentId));
+                    .orElseThrow(() -> new IllegalArgumentException(String.format(APPOINTMENT_NOT_FOUND, appointmentId)));
 
-            if (!appointment.getPatient().getId().equals(patientId)) {
-                throw new UnauthorizedAccessException("You are not authorized to cancel this appointment.");
-            }
-
-            if (!appointment.getPatient().getUsername().equals(username)) {
-                throw new UnauthorizedAccessException("You can only cancel your own appointments.");
+            if (!appointment.getPatient().getId().equals(patientId) || !appointment.getPatient().getUsername().equals(username)) {
+                throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             appointment.setAppointmentStatus(Status.CANCELLED);
@@ -314,7 +314,6 @@ public class AppointmentServiceImpl implements AppointmentService {
                     availabilityRepository.save(after);
                 }
             }
-
             a.setAvailabilityStatus(Status.BOOKED);
         }
     }
