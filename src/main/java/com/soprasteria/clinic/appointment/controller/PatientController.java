@@ -3,6 +3,7 @@ package com.soprasteria.clinic.appointment.controller;
 import com.soprasteria.clinic.appointment.dto.PatientDTO;
 import com.soprasteria.clinic.appointment.entity.Patient;
 import com.soprasteria.clinic.appointment.service.PatientService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ public class PatientController {
 	private PatientService patientService;
 
 	@PostMapping
+	@SecurityRequirements
 	public ResponseEntity<?> registerPatient(@RequestBody Patient patient) {
 		logger.info("Attempting to register new patient with username: {}", patient.getUsername());
 		return patientService.registerPatient(patient);
