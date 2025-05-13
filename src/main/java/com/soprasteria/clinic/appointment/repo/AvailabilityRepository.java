@@ -1,7 +1,7 @@
 package com.soprasteria.clinic.appointment.repo;
 
 import com.soprasteria.clinic.appointment.entity.Availability;
-import com.soprasteria.clinic.appointment.entity.Status;
+import com.soprasteria.clinic.appointment.util.Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
