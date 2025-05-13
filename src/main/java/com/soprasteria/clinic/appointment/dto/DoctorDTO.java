@@ -2,33 +2,39 @@ package com.soprasteria.clinic.appointment.dto;
 
 public class DoctorDTO {
 
-	private Long doctor_id;
-	private String doctor_name;
-	private String doctor_specialization;
+	private Long id;
+
+	private String doctorName;
+
+	private String doctorSpecialization;
+
 	private String username;
 
-	public Long getDoctor_id() {
-		return doctor_id;
+	public DoctorDTO() {
 	}
 
-	public void setDoctor_id(Long doctor_id) {
-		this.doctor_id = doctor_id;
+	public Long getId() {
+		return id;
 	}
 
-	public String getDoctor_name() {
-		return doctor_name;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
-	public void setDoctor_name(String doctor_name) {
-		this.doctor_name = doctor_name;
+	public String getDoctorName() {
+		return doctorName;
 	}
 
-	public String getDoctor_specialization() {
-		return doctor_specialization;
+	public void setDoctorName(String doctorName) {
+		this.doctorName = doctorName;
 	}
 
-	public void setDoctor_specialization(String doctor_specialization) {
-		this.doctor_specialization = doctor_specialization;
+	public String getDoctorSpecialization() {
+		return doctorSpecialization;
+	}
+
+	public void setDoctorSpecialization(String doctorSpecialization) {
+		this.doctorSpecialization = doctorSpecialization;
 	}
 
 	public String getUsername() {

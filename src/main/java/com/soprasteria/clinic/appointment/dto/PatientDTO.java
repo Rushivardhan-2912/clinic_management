@@ -2,11 +2,11 @@ package com.soprasteria.clinic.appointment.dto;
 
 public class PatientDTO {
 
-	private Long patient_id;
-	private String patient_name;
-	private String patient_email;
-	private String patient_phoneNumber;
-	private String patient_age;
+	private Long id;
+	private String patientName;
+	private String patientEmail;
+	private String patientPhoneNumber;
+	private String patientAge;
 	private String username;
 
 	public String getUsername() {
@@ -17,43 +17,43 @@ public class PatientDTO {
 		this.username = username;
 	}
 
-	public Long getPatient_id() {
-		return patient_id;
+	public Long getId() {
+		return id;
 	}
 
-	public void setPatient_id(Long patient_id) {
-		this.patient_id = patient_id;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
-	public String getPatient_name() {
-		return patient_name;
+	public String getPatientName() {
+		return patientName;
 	}
 
-	public void setPatient_name(String patient_name) {
-		this.patient_name = patient_name;
+	public void setPatientName(String patientName) {
+		this.patientName = patientName;
 	}
 
-	public String getPatient_email() {
-		return patient_email;
+	public String getPatientEmail() {
+		return patientEmail;
 	}
 
-	public void setPatient_email(String patient_email) {
-		this.patient_email = patient_email;
+	public void setPatientEmail(String patientEmail) {
+		this.patientEmail = patientEmail;
 	}
 
-	public String getPatient_phoneNumber() {
-		return patient_phoneNumber;
+	public String getPatientPhoneNumber() {
+		return patientPhoneNumber;
 	}
 
-	public void setPatient_phoneNumber(String patient_phoneNumber) {
-		this.patient_phoneNumber = patient_phoneNumber;
+	public void setPatientPhoneNumber(String patientPhoneNumber) {
+		this.patientPhoneNumber = patientPhoneNumber;
 	}
 
-	public String getPatient_age() {
-		return patient_age;
+	public String getPatientAge() {
+		return patientAge;
 	}
 
-	public void setPatient_age(String patient_age) {
-		this.patient_age = patient_age;
+	public void setPatientAge(String patientAge) {
+		this.patientAge = patientAge;
 	}
 }

@@ -1,58 +1,60 @@
 package com.soprasteria.clinic.appointment.dto;
 
 
+import com.soprasteria.clinic.appointment.entity.Status;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class AppointmentDTO {
 
-	private Long appointment_id;
-	private LocalDate appointment_date;
-    private LocalTime appointment_startTime;
-    private LocalTime appointment_endTime;
-    private String appointment_status;
+	private Long id;
+	private LocalDate appointmentDate;
+    private LocalTime appointmentStartTime;
+    private LocalTime appointmentEndTime;
+    private Status appointmentStatus;
     
     private PatientDTO patient;
     private DoctorDTO doctor;
 
-	public Long getAppointment_id() {
-		return appointment_id;
+	public Long getId() {
+		return id;
 	}
 
-	public void setAppointment_id(Long appointment_id) {
-		this.appointment_id = appointment_id;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
-	public LocalDate getAppointment_date() {
-		return appointment_date;
+	public LocalDate getAppointmentDate() {
+		return appointmentDate;
 	}
 
-	public void setAppointment_date(LocalDate appointment_date) {
-		this.appointment_date = appointment_date;
+	public void setAppointmentDate(LocalDate appointmentDate) {
+		this.appointmentDate = appointmentDate;
 	}
 
-	public LocalTime getAppointment_startTime() {
-		return appointment_startTime;
+	public LocalTime getAppointmentStartTime() {
+		return appointmentStartTime;
 	}
 
-	public void setAppointment_startTime(LocalTime appointment_startTime) {
-		this.appointment_startTime = appointment_startTime;
+	public void setAppointmentStartTime(LocalTime appointmentStartTime) {
+		this.appointmentStartTime = appointmentStartTime;
 	}
 
-	public LocalTime getAppointment_endTime() {
-		return appointment_endTime;
+	public LocalTime getAppointmentEndTime() {
+		return appointmentEndTime;
 	}
 
-	public void setAppointment_endTime(LocalTime appointment_endTime) {
-		this.appointment_endTime = appointment_endTime;
+	public void setAppointmentEndTime(LocalTime appointmentEndTime) {
+		this.appointmentEndTime = appointmentEndTime;
 	}
 
-	public String getAppointment_status() {
-		return appointment_status;
+	public Status getAppointmentStatus() {
+		return appointmentStatus;
 	}
 
-	public void setAppointment_status(String appointment_status) {
-		this.appointment_status = appointment_status;
+	public void setAppointmentStatus(Status appointmentStatus) {
+		this.appointmentStatus = appointmentStatus;
 	}
 
 	public PatientDTO getPatient() {
