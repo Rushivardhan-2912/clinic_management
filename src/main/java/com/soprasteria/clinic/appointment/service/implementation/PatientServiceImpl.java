@@ -90,7 +90,7 @@ public class PatientServiceImpl implements PatientService {
         } catch (ClinicExceptionHandler.UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (PatientNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating patient", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update patient");
@@ -112,7 +112,7 @@ public class PatientServiceImpl implements PatientService {
 
             return ResponseEntity.ok("Patient with ID " + id + " deleted successfully.");
         } catch (PatientNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error deleting patient", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete patient");

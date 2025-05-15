@@ -85,16 +85,16 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(globalMapper.toAppointmentDTO(saved));
         } catch (PatientNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (DoctorNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (InvalidTimeSlotException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error booking appointment", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -119,12 +119,12 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             return ResponseEntity.ok(result);
         } catch (PatientNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error viewing appointments for patient", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -149,12 +149,12 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             return ResponseEntity.ok(result);
         } catch (DoctorNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error viewing appointments for doctor", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -168,7 +168,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             logger.error("Error viewing all appointments", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -216,14 +216,14 @@ public class AppointmentServiceImpl implements AppointmentService {
             handleOverlappingAvailabilities(doctor, newDate, newStart, newEnd);
             return ResponseEntity.ok(globalMapper.toAppointmentDTO(updated));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         } catch (InvalidTimeSlotException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error rescheduling appointment", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
@@ -244,12 +244,12 @@ public class AppointmentServiceImpl implements AppointmentService {
             updateAvailabilityForCanceledAppointment(appointment);
             return ResponseEntity.ok("Appointment canceled successfully.");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error cancelling appointment", e);
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 

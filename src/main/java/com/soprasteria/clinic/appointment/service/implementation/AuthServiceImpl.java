@@ -9,8 +9,7 @@ import com.soprasteria.clinic.appointment.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -44,7 +43,7 @@ public class AuthServiceImpl implements AuthService {
         } catch (ClinicExceptionHandler.BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ex.getMessage());
         } catch (UsernameNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Authentication failed: " + ex.getMessage());
         }

@@ -85,7 +85,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (DoctorNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error adding availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -150,7 +150,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (AvailabilityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
@@ -178,9 +178,9 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         } catch (UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         } catch (AvailabilityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (DoctorNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error deleting availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());

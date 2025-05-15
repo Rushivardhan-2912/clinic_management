@@ -88,7 +88,7 @@ public class DoctorServiceImpl implements DoctorService {
 
             return ResponseEntity.ok(globalMapper.toDoctorDTO(savedDoctor));
         } catch (DoctorNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating doctor", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Update failed");
@@ -109,7 +109,7 @@ public class DoctorServiceImpl implements DoctorService {
 
             return ResponseEntity.ok("Doctor with ID " + id + " deleted successfully.");
         } catch (ClinicExceptionHandler.DoctorNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error deleting doctor", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Deletion failed");
