@@ -3,6 +3,7 @@ package com.soprasteria.clinic.appointment.controller;
 import com.soprasteria.clinic.appointment.dto.AppointmentDTO;
 import com.soprasteria.clinic.appointment.repo.PatientRepository;
 import com.soprasteria.clinic.appointment.service.AppointmentService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/appointments")
+@SecurityRequirement( name = "bearerAuth")
 public class AppointmentController {
 
 	private static final Logger logger = LogManager.getLogger(AppointmentController.class);

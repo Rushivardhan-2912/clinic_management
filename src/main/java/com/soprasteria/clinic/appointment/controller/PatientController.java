@@ -3,7 +3,7 @@ package com.soprasteria.clinic.appointment.controller;
 import com.soprasteria.clinic.appointment.dto.PatientDTO;
 import com.soprasteria.clinic.appointment.entity.Patient;
 import com.soprasteria.clinic.appointment.service.PatientService;
-import io.swagger.v3.oas.annotations.security.SecurityRequirements;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ public class PatientController {
 	private PatientService patientService;
 
 	@PostMapping
-	@SecurityRequirements
 	public ResponseEntity<?> registerPatient(@RequestBody Patient patient) {
 		logger.info("Attempting to register new patient with username: {}", patient.getUsername());
 		return patientService.registerPatient(patient);
@@ -30,6 +29,7 @@ public class PatientController {
 
 	@GetMapping
 	@PreAuthorize("hasRole('ADMIN')")
+	@SecurityRequirement( name = "bearerAuth")
 	public ResponseEntity<?> getAllPatients(@RequestParam(defaultValue = "0") int page,
 											@RequestParam(defaultValue = "10") int size) {
 		logger.info("Retrieving all patients with page: {} and size: {}", page, size);
@@ -38,6 +38,7 @@ public class PatientController {
 
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('PATIENT')")
+	@SecurityRequirement( name = "bearerAuth")
 	public ResponseEntity<?> updatePatient(@RequestBody PatientDTO patientDTO,
 										   @PathVariable Long id,
 										   Authentication authentication) {
@@ -47,6 +48,7 @@ public class PatientController {
 
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ADMIN')")
+	@SecurityRequirement( name = "bearerAuth")
 	public ResponseEntity<?> deletePatientById(@PathVariable Long id) {
 		logger.info("Attempting to delete patient with ID: {}", id);
 		return patientService.deletePatientById(id);
