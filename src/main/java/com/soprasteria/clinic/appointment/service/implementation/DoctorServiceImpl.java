@@ -42,19 +42,6 @@ public class DoctorServiceImpl implements DoctorService {
     private GlobalMapper globalMapper;
 
     @Override
-    public ResponseEntity<?> findByUsername(String username) {
-        try {
-            logger.info("Finding doctor with username: {}", username);
-            return doctorRepository.findByUsername(username)
-                    .<ResponseEntity<?>>map(ResponseEntity::ok)
-                    .orElseGet(() -> ResponseEntity.status(HttpStatus.NOT_FOUND).body(String.format(DOCTOR_NOT_FOUND,username)));
-        } catch (Exception e) {
-            logger.error("Error finding doctor", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to retrieve doctor");
-        }
-    }
-
-    @Override
     @Transactional
     public ResponseEntity<?> registerDoctor(Doctor doctor) {
         try {

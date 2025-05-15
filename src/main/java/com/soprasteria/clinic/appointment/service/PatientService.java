@@ -4,11 +4,7 @@ import com.soprasteria.clinic.appointment.dto.PatientDTO;
 import com.soprasteria.clinic.appointment.entity.Patient;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Optional;
-
 public interface PatientService {
-
-    Optional<Patient> findByUsername(String username);
 
     ResponseEntity<?> registerPatient(Patient patient);
 

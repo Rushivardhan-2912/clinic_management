@@ -6,8 +6,6 @@ import org.springframework.http.ResponseEntity;
 
 public interface DoctorService {
 
-    ResponseEntity<?> findByUsername(String username);
-
     ResponseEntity<?> registerDoctor(Doctor doctor);
 
     ResponseEntity<?> getAllDoctors(int page, int size);

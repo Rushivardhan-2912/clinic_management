@@ -41,12 +41,6 @@ public class PatientServiceImpl implements PatientService {
     private ObjectMapper objectMapper;
 
     @Override
-    public Optional<Patient> findByUsername(String username) {
-        logger.info("Attempting to find patient with username: {}", username);
-        return patientRepository.findByUsername(username);
-    }
-
-    @Override
     @Transactional
     public ResponseEntity<?> registerPatient(Patient patient) {
         try {
