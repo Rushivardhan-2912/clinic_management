@@ -21,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -82,14 +81,16 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             if (availabilityDTO.getStatus() == null) {
                 availabilityDTO.setStatus(StatusEnum.AVAILABLE);
             }
-
+            logger.info("Added Availability with for doctor : {}",doctor.getUsername());
             Availability availability = globalMapper.toAvailabilityEntity(availabilityDTO, doctor);
             Availability saved = availabilityRepository.save(availability);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(globalMapper.toAvailabilityDTO(saved));
         } catch (UnauthorizedAccessException e) {
+            logger.error("Error adding availability : {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (DoctorNotFoundException e) {
+            logger.error("Error adding availability : {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error adding availability: {}", e.getMessage());
@@ -130,15 +131,19 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             }
 
             BeanUtils.copyProperties(availabilityDTO, availability, NullPropertyUtils.getNullPropertyNames(availabilityDTO));
+            logger.info("Attempting to update the availability: {}",availabilityId);
             availability.setDoctor(doctor);
             availability.setId(availabilityId);
             availability.setStatus(StatusEnum.AVAILABLE);
 
             Availability updated = availabilityRepository.save(availability);
+            logger.info("updated availability successfully");
             return ResponseEntity.ok(globalMapper.toAvailabilityDTO(updated));
         } catch (UnauthorizedAccessException e) {
+            logger.error("Error updating availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (AvailabilityNotFoundException e) {
+            logger.error("Error updating availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating availability: {}", e.getMessage());
@@ -164,11 +169,14 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
+            logger.info("Trying to delete availability with id: {}",id);
             availabilityRepository.deleteById(id);
             return ResponseEntity.ok("Availability deleted successfully with ID: " + id);
         } catch (UnauthorizedAccessException e) {
+            logger.error("Error deleting availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (AvailabilityNotFoundException | DoctorNotFoundException e) {
+            logger.error("Error deleting availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error deleting availability: {}", e.getMessage());
@@ -229,7 +237,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch doctor availabilities");
         }
     }
-
 
     // 🔁 Private method to check overlapping slots on ADD
     private boolean hasOverlappingAvailability(Long doctorId, LocalDate date, LocalTime start, LocalTime end) {
