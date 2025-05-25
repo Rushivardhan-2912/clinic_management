@@ -35,8 +35,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 									@Param("startTime") LocalTime startTime,
 									@Param("endTime") LocalTime endTime);
 
+
 	@Modifying
-	@Query("DELETE FROM Appointment a WHERE a.date < :today")
-	void deletePastData(@Param("today") LocalDate today);
+	@Query("UPDATE Appointment a SET a.status = 'COMPLETED' " +
+			"WHERE (a.date < :today) " +
+			"OR (a.date = :today AND a.endTime < :nowTime) " +
+			"AND a.status = 'BOOKED'")
+	int markPastAsExpired(@Param("today") LocalDate today,
+						  @Param("nowTime") LocalTime nowTime);
+
 }
 

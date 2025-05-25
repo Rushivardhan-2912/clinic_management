@@ -91,7 +91,13 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
                                             @Param("startTime") LocalTime startTime,
                                             @Param("endTime") LocalTime endTime);
 
+
     @Modifying
-    @Query("DELETE FROM Availability e WHERE e.date < :today")
-    void deletePastData(@Param("today") LocalDate today);
+    @Query("UPDATE Availability a SET a.status = 'EXPIRED' " +
+            "WHERE (a.date < :today) " +
+            "OR (a.date = :today AND a.endTime < :nowTime) " +
+            "AND a.status = 'AVAILABLE'")
+    int markPastAsExpired(@Param("today") LocalDate today,
+                          @Param("nowTime") LocalTime nowTime);
+
 }

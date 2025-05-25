@@ -206,7 +206,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Error retrieving availabilities", e);
+            logger.error("Error retrieving availabilities", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch availabilities");
         }
     }
