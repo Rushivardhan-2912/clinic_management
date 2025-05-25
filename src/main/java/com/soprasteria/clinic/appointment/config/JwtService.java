@@ -1,24 +1,48 @@
 package com.soprasteria.clinic.appointment.config;
 
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import java.io.InputStream;
+import java.security.KeyFactory;
+import java.security.PrivateKey;
+import java.security.PublicKey;
+import java.security.spec.*;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
+    private PrivateKey privateKey;
+    private PublicKey publicKey;
 
-    private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(secretKey.getBytes());
+    @Value("${jwt.expiration.ms}")
+    private long expiration;
+
+    @PostConstruct
+    public void loadKeys() throws Exception {
+        // Load private key
+        try (InputStream in = getClass().getResourceAsStream("/keys/private.pem")) {
+            String key = new String(in.readAllBytes()).replaceAll("-----\\w+ PRIVATE KEY-----", "").replaceAll("\\s+", "");
+            byte[] keyBytes = Base64.getDecoder().decode(key);
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            privateKey = kf.generatePrivate(spec);
+        }
+
+        // Load public key
+        try (InputStream in = getClass().getResourceAsStream("/keys/public.pem")) {
+            String key = new String(in.readAllBytes()).replaceAll("-----\\w+ PUBLIC KEY-----", "").replaceAll("\\s+", "");
+            byte[] keyBytes = Base64.getDecoder().decode(key);
+            X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            publicKey = kf.generatePublic(spec);
+        }
     }
 
     public String generateToken(UserDetails userDetails) {
@@ -26,10 +50,10 @@ public class JwtService {
                 .setSubject(userDetails.getUsername())
                 .claim("roles", userDetails.getAuthorities().stream()
                         .map(auth -> auth.getAuthority())
-                        .collect(Collectors.toList()))
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 3600_000)) // 1 hour
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                        .toList())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(privateKey, SignatureAlgorithm.RS256)
                 .compact();
     }
 
@@ -48,14 +72,14 @@ public class JwtService {
 
     private Claims extractClaims(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(getSigningKey())
+                .setSigningKey(publicKey)
+                .setAllowedClockSkewSeconds(5)
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
     }
 
     public List<String> extractRoles(String token) {
-        Claims claims = extractClaims(token);
-        return claims.get("roles", List.class);
+        return extractClaims(token).get("roles", List.class);
     }
 }

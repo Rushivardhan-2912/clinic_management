@@ -1,24 +1,27 @@
 package com.soprasteria.clinic.appointment.mapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.soprasteria.clinic.appointment.dto.AppointmentDTO;
 import com.soprasteria.clinic.appointment.dto.AvailabilityDTO;
+import com.soprasteria.clinic.appointment.dto.AppointmentDTO;
 import com.soprasteria.clinic.appointment.dto.DoctorDTO;
 import com.soprasteria.clinic.appointment.dto.PatientDTO;
-import com.soprasteria.clinic.appointment.entity.Appointment;
 import com.soprasteria.clinic.appointment.entity.Availability;
+import com.soprasteria.clinic.appointment.entity.Appointment;
 import com.soprasteria.clinic.appointment.entity.Doctor;
 import com.soprasteria.clinic.appointment.entity.Patient;
+import com.soprasteria.clinic.appointment.entity.StatusEnum;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class GlobalMapper {
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
+
+    public GlobalMapper(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
 
     private static final Logger logger = LogManager.getLogger(GlobalMapper.class);
 
@@ -64,10 +67,17 @@ public class GlobalMapper {
     }
 
     public Availability toAvailabilityEntity(AvailabilityDTO dto, Doctor doctor) {
-        logger.debug("Converting AvailabilityDTO to entity: {}", dto);
         Availability availability = objectMapper.convertValue(dto, Availability.class);
         availability.setDoctor(doctor);
-        logger.debug("Converted to Availability entity: {}", availability);
+
+        // Ensure availabilityStatus is set
+        if (dto.getStatus() == null) {
+            availability.setStatus(StatusEnum.AVAILABLE);  // Default to AVAILABLE
+            logger.warn("Availability status was null, setting to AVAILABLE");
+        } else {
+            availability.setStatus(dto.getStatus());
+        }
+
         return availability;
     }
 

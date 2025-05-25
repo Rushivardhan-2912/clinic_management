@@ -1,31 +1,35 @@
 package com.soprasteria.clinic.appointment.service.implementation;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.soprasteria.clinic.appointment.dto.AvailabilityDTO;
 import com.soprasteria.clinic.appointment.entity.Availability;
 import com.soprasteria.clinic.appointment.entity.Doctor;
-import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.AvailabilityNotFoundException;
-import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.DoctorNotFoundException;
-import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.UnauthorizedAccessException;
+import com.soprasteria.clinic.appointment.entity.StatusEnum;
 import com.soprasteria.clinic.appointment.mapper.GlobalMapper;
 import com.soprasteria.clinic.appointment.repo.AvailabilityRepository;
 import com.soprasteria.clinic.appointment.repo.DoctorRepository;
+import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.AvailabilityNotFoundException;
+import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.DoctorNotFoundException;
+import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler.UnauthorizedAccessException;
 import com.soprasteria.clinic.appointment.service.AvailabilityService;
 import com.soprasteria.clinic.appointment.util.NullPropertyUtils;
-import com.soprasteria.clinic.appointment.util.Status;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.soprasteria.clinic.appointment.util.GenericMessages.*;
 
@@ -34,56 +38,57 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     private static final Logger logger = LogManager.getLogger(AvailabilityServiceImpl.class);
 
-    @Autowired
-    private AvailabilityRepository availabilityRepository;
+    private final AvailabilityRepository availabilityRepository;
+    private final GlobalMapper globalMapper;
+    private final DoctorRepository doctorRepository;
 
-    @Autowired
-    private GlobalMapper globalMapper;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private DoctorRepository doctorRepository;
+    public AvailabilityServiceImpl(AvailabilityRepository availabilityRepository,
+                                 GlobalMapper globalMapper,
+                                 DoctorRepository doctorRepository) {
+        this.availabilityRepository = availabilityRepository;
+        this.globalMapper = globalMapper;
+        this.doctorRepository = doctorRepository;
+    }
 
     @Override
     @Transactional
     public ResponseEntity<?> addAvailability(AvailabilityDTO availabilityDTO, Long doctorId, String loggedInUsername) {
         try {
             Doctor doctor = doctorRepository.findById(doctorId)
-                    .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND,doctorId)));
+                    .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND, doctorId)));
 
-            if (!doctor.getUsername().equals(loggedInUsername)) {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+            if (!(isAdmin || doctor.getUsername().equals(loggedInUsername))) {
                 throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
-            LocalTime startTime = availabilityDTO.getAvailabilityStartTime();
-            LocalTime endTime = availabilityDTO.getAvailabilityEndTime();
-            LocalDate date = availabilityDTO.getAvailabilityDate();
+            LocalTime startTime = availabilityDTO.getStartTime();
+            LocalTime endTime = availabilityDTO.getEndTime();
+            LocalDate date = availabilityDTO.getDate();
 
             if (startTime != null && endTime != null && !endTime.isAfter(startTime)) {
                 return ResponseEntity.badRequest().body("Start time must be before end time.");
             }
 
-            // Check for existing availability to prevent duplicates
-            boolean exists = availabilityRepository.existsByDoctorAndDateAndTime(
-                    doctorId, date, startTime, endTime
-            );
-
-            if (exists) {
+            // Check for overlapping time slot
+            if (hasOverlappingAvailability(doctorId, date, startTime, endTime)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
-                        .body("This availability slot already exists.");
+                        .body("This availability slot overlaps with an existing one.");
+            }
+
+            if (availabilityDTO.getStatus() == null) {
+                availabilityDTO.setStatus(StatusEnum.AVAILABLE);
             }
 
             Availability availability = globalMapper.toAvailabilityEntity(availabilityDTO, doctor);
-            availability.setAvailabilityStatus(Status.AVAILABLE);
-
             Availability saved = availabilityRepository.save(availability);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(globalMapper.toAvailabilityDTO(saved));
-
         } catch (UnauthorizedAccessException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (DoctorNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -93,62 +98,46 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         }
     }
 
-
-    @Override
-    public ResponseEntity<?> getAllAvailabilities() {
-        try {
-            List<Availability> availabilities = availabilityRepository.findAll();
-            List<AvailabilityDTO> dtos = availabilities.stream()
-                    .map(globalMapper::toAvailabilityDTO)
-                    .toList();
-            return ResponseEntity.ok(dtos);
-        } catch (Exception e) {
-            logger.error("Error retrieving availabilities: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
-    @Override
-    public ResponseEntity<?> getDoctorAvailabilities(Long doctorId) {
-        try {
-            List<Availability> availabilities = availabilityRepository.findByDoctorId(doctorId);
-            List<AvailabilityDTO> dtos = availabilities.stream()
-                    .map(globalMapper::toAvailabilityDTO)
-                    .toList();
-            return ResponseEntity.ok(dtos);
-        } catch (Exception e) {
-            logger.error("Error retrieving doctor availabilities: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
-        }
-    }
-
-
     @Override
     @Transactional
     public ResponseEntity<?> updateAvailability(AvailabilityDTO availabilityDTO, Long availabilityId, String loggedInUsername) {
         try {
             Availability availability = availabilityRepository.findById(availabilityId)
-                    .orElseThrow(() -> new AvailabilityNotFoundException(String.format(AVAILABILITY_NOT_FOUND,availabilityId)));
+                    .orElseThrow(() -> new AvailabilityNotFoundException(String.format(AVAILABILITY_NOT_FOUND, availabilityId)));
+
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
             Doctor doctor = availability.getDoctor();
-            if (!doctor.getUsername().equals(loggedInUsername)) {
+
+            if (!(isAdmin || doctor.getUsername().equals(loggedInUsername))) {
                 throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
-            if (availabilityDTO.getAvailabilityStartTime() != null && availabilityDTO.getAvailabilityEndTime() != null &&
-                    availabilityDTO.getAvailabilityStartTime().isAfter(availabilityDTO.getAvailabilityEndTime())) {
-                return ResponseEntity.badRequest().body("Start time cannot be after end time.");
+            LocalTime startTime = availabilityDTO.getStartTime();
+            LocalTime endTime = availabilityDTO.getEndTime();
+            LocalDate date = availabilityDTO.getDate();
+
+            if (startTime != null && endTime != null && date != null) {
+                if (startTime.isAfter(endTime)) {
+                    return ResponseEntity.badRequest().body("Start time cannot be after end time.");
+                }
+
+                if (hasOverlappingAvailabilityForUpdate(doctor.getId(), availabilityId, date, startTime, endTime)) {
+                    return ResponseEntity.badRequest().body("Updated availability slot overlaps with another existing slot.");
+                }
             }
 
             BeanUtils.copyProperties(availabilityDTO, availability, NullPropertyUtils.getNullPropertyNames(availabilityDTO));
             availability.setDoctor(doctor);
             availability.setId(availabilityId);
-            availability.setAvailabilityStatus( Status.AVAILABLE);
+            availability.setStatus(StatusEnum.AVAILABLE);
 
             Availability updated = availabilityRepository.save(availability);
             return ResponseEntity.ok(globalMapper.toAvailabilityDTO(updated));
         } catch (UnauthorizedAccessException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (AvailabilityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
@@ -159,27 +148,27 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     @Override
     @Transactional
-    public ResponseEntity<?> deleteAvailability(Long id, String username, Authentication authentication) {
+    public ResponseEntity<?> deleteAvailability(Long id, String username) {
         try {
-            validateLoggedInUser(username, authentication);
-
             Availability availability = availabilityRepository.findById(id)
-                    .orElseThrow(() -> new AvailabilityNotFoundException(String.format(AVAILABILITY_NOT_FOUND,id)));
+                    .orElseThrow(() -> new AvailabilityNotFoundException(String.format(AVAILABILITY_NOT_FOUND, id)));
 
             Doctor doctor = doctorRepository.findByUsername(username)
-                    .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND,username)));
+                    .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND, username)));
 
-            if (!availability.getDoctor().getId().equals(doctor.getId())) {
+            var auth = SecurityContextHolder.getContext().getAuthentication();
+            boolean isAdmin = auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+            if (!(isAdmin || availability.getDoctor().getId().equals(doctor.getId()))) {
                 throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             availabilityRepository.deleteById(id);
             return ResponseEntity.ok("Availability deleted successfully with ID: " + id);
         } catch (UnauthorizedAccessException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-        } catch (AvailabilityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (DoctorNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        } catch (AvailabilityNotFoundException | DoctorNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error deleting availability: {}", e.getMessage());
@@ -187,9 +176,68 @@ public class AvailabilityServiceImpl implements AvailabilityService {
         }
     }
 
-    private void validateLoggedInUser(String username, Authentication authentication) {
-        if (authentication == null || !authentication.getName().equals(username)) {
-            throw new UnauthorizedAccessException(UNAUTHORIZED);
+    @Override
+    public ResponseEntity<?> getAllAvailabilities(int page, int size) {
+        try {
+            logger.info("Retrieving all availabilities - Page: {}, Size: {}", page, size);
+
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Availability> availabilityPage = availabilityRepository.findAll(pageable);
+
+            List<AvailabilityDTO> dtos = availabilityPage.getContent().stream()
+                    .map(globalMapper::toAvailabilityDTO)
+                    .toList();
+
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("data", dtos);
+            response.put("pageNo", availabilityPage.getNumber());
+            response.put("pageSize", availabilityPage.getSize());
+            response.put("totalResults", availabilityPage.getTotalElements());
+            response.put("totalPages", availabilityPage.getTotalPages());
+            response.put("last", availabilityPage.isLast());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error retrieving availabilities", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch availabilities");
         }
+    }
+
+    @Override
+    public ResponseEntity<?> getDoctorAvailabilities(Long doctorId, int page, int size) {
+        try {
+            logger.info("Retrieving availabilities for doctor ID: {}, Page: {}, Size: {}", doctorId, page, size);
+
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Availability> availabilityPage = availabilityRepository.findByDoctorId(doctorId, pageable);
+
+            List<AvailabilityDTO> dtos = availabilityPage.getContent().stream()
+                    .map(globalMapper::toAvailabilityDTO)
+                    .toList();
+
+            Map<String, Object> response = new LinkedHashMap<>();
+            response.put("data", dtos);
+            response.put("pageNo", availabilityPage.getNumber());
+            response.put("pageSize", availabilityPage.getSize());
+            response.put("totalResults", availabilityPage.getTotalElements());
+            response.put("totalPages", availabilityPage.getTotalPages());
+            response.put("last", availabilityPage.isLast());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Error retrieving doctor availabilities", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch doctor availabilities");
+        }
+    }
+
+
+    // 🔁 Private method to check overlapping slots on ADD
+    private boolean hasOverlappingAvailability(Long doctorId, LocalDate date, LocalTime start, LocalTime end) {
+        return !availabilityRepository.findOverlappingAvailabilities(doctorId, date, start, end).isEmpty();
+    }
+
+    // 🔁 Private method to check overlapping slots on UPDATE
+    private boolean hasOverlappingAvailabilityForUpdate(Long doctorId, Long availabilityId, LocalDate date, LocalTime start, LocalTime end) {
+        return !availabilityRepository.findOverlappingAvailabilitiesForUpdate(doctorId, availabilityId, date, start, end).isEmpty();
     }
 }

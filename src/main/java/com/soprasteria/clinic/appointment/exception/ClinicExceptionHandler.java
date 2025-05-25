@@ -1,12 +1,9 @@
 package com.soprasteria.clinic.appointment.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.HashMap;
-import java.util.Map;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.FieldError;
 
 @RestControllerAdvice
 public class ClinicExceptionHandler {
@@ -15,6 +12,19 @@ public class ClinicExceptionHandler {
     @ExceptionHandler(PatientNotFoundException.class)
     public ResponseEntity<?> handlePatientNotFound(PatientNotFoundException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<String> handleValidationErrors(MethodArgumentNotValidException ex) {
+        // Get the first validation error message
+        String errorMessage = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .findFirst()
+                .map(FieldError::getDefaultMessage)
+                .orElse("Invalid input");
+
+        return ResponseEntity.badRequest().body(errorMessage);
     }
 
     // Doctor Not Found Exception Handler
@@ -32,12 +42,6 @@ public class ClinicExceptionHandler {
     // Availability Not Found Exception Handler
     @ExceptionHandler(AvailabilityNotFoundException.class)
     public ResponseEntity<?> handleAvailabilityNotFound(AvailabilityNotFoundException ex) {
-        return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage());
-    }
-
-    // Admin Not Found Exception Handler
-    @ExceptionHandler(AdminNotFoundException.class)
-    public ResponseEntity<?> handleAdminNotFound(AdminNotFoundException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
@@ -53,23 +57,21 @@ public class ClinicExceptionHandler {
         return buildResponse(HttpStatus.UNAUTHORIZED, "Invalid username or password");
     }
 
-    // Unauthorized Access Exception Handler
-    @ExceptionHandler(UnauthorizedAccessException.class)
-    public ResponseEntity<?> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
-        return buildResponse(HttpStatus.FORBIDDEN, ex.getMessage());
-    }
-
     // General Exception Handler (for unexpected errors)
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleAllOtherExceptions(Exception ex) {
-        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error: " + ex.getMessage());
+        if (ex instanceof org.springframework.security.access.AccessDeniedException) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("You don't have permission to access this resource.");
+        }
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error: " + ex.getMessage());
     }
+
 
     // Utility method to construct the response
     private ResponseEntity<?> buildResponse(HttpStatus status, String message) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", message);  // Only send the message, not the stack trace
-        return new ResponseEntity<>(response, status);
+         // Only send the message, not the stack trace
+        return ResponseEntity.status(status).body(message);
     }
 
     // --- Custom Exception Classes ---
@@ -109,8 +111,4 @@ public class ClinicExceptionHandler {
         public UnauthorizedAccessException(String message) { super(message); }
     }
 
-    // Admin Not Found Exception
-    public static class AdminNotFoundException extends RuntimeException {
-        public AdminNotFoundException(String message) { super(message); }
-    }
 }

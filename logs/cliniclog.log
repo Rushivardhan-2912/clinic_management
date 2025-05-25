@@ -1,0 +1,45 @@
+2025-05-25T12:03:58.433+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] c.s.c.a.ClinicAppointmentApplication     : Starting ClinicAppointmentApplication using Java 23.0.1 with PID 2500 (C:\Users\rbgathram\Downloads\clinic-appointment\clinic_management\target\classes started by rbgathram in C:\Users\rbgathram\Downloads\clinic-appointment\clinic_management)
+2025-05-25T12:03:58.435+05:30 DEBUG 2500 --- [clinic-appointment] [restartedMain] c.s.c.a.ClinicAppointmentApplication     : Running with Spring Boot v3.4.4, Spring v6.2.5
+2025-05-25T12:03:58.436+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] c.s.c.a.ClinicAppointmentApplication     : No active profile set, falling back to 1 default profile: "default"
+2025-05-25T12:03:58.511+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-05-25T12:03:58.512+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-05-25T12:04:00.365+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-25T12:04:00.452+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 76 ms. Found 5 JPA repository interfaces.
+2025-05-25T12:04:01.357+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 1229 (http)
+2025-05-25T12:04:01.378+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-25T12:04:01.379+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2025-05-25T12:04:01.453+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-25T12:04:01.455+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2943 ms
+2025-05-25T12:04:01.728+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-05-25T12:04:01.806+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
+2025-05-25T12:04:01.857+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2025-05-25T12:04:02.184+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-25T12:04:02.220+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-25T12:04:02.517+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@5952293d
+2025-05-25T12:04:02.520+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-25T12:04:02.593+05:30  WARN 2500 --- [clinic-appointment] [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: PostgreSQLDialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-05-25T12:04:02.620+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 17.4
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2025-05-25T12:04:03.914+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-05-25T12:04:04.210+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-25T12:04:04.650+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-05-25T12:04:05.287+05:30 DEBUG 2500 --- [clinic-appointment] [restartedMain] c.s.c.a.config.JwtAuthenticationFilter   : Filter 'jwtAuthenticationFilter' configured for use
+2025-05-25T12:04:05.948+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] eAuthenticationProviderManagerConfigurer : Global AuthenticationManager configured with AuthenticationProvider bean with name authenticationProvider
+2025-05-25T12:04:05.949+05:30  WARN 2500 --- [clinic-appointment] [restartedMain] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with an AuthenticationProvider bean. UserDetailsService beans will not be used by Spring Security for automatically configuring username/password login. Consider removing the AuthenticationProvider bean. Alternatively, consider using the UserDetailsService in a manually instantiated DaoAuthenticationProvider. If the current configuration is intentional, to turn off this warning, increase the logging level of 'org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer' to ERROR
+2025-05-25T12:04:06.160+05:30  WARN 2500 --- [clinic-appointment] [restartedMain] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-05-25T12:04:06.849+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:8080/clinic_db'
+2025-05-25T12:04:06.948+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-05-25T12:04:06.988+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 1229 (http) with context path '/'
+2025-05-25T12:04:06.998+05:30  INFO 2500 --- [clinic-appointment] [restartedMain] c.s.c.a.ClinicAppointmentApplication     : Started ClinicAppointmentApplication in 9.1 seconds (process running for 11.128)
+2025-05-25T12:04:32.183+05:30  INFO 2500 --- [clinic-appointment] [http-nio-1229-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-25T12:04:32.183+05:30  INFO 2500 --- [clinic-appointment] [http-nio-1229-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-05-25T12:04:32.191+05:30  INFO 2500 --- [clinic-appointment] [http-nio-1229-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 8 ms
+2025-05-25T12:04:33.971+05:30  INFO 2500 --- [clinic-appointment] [http-nio-1229-exec-9] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 1258 ms
+2025-05-25T12:05:16.625+05:30  INFO 2500 --- [clinic-appointment] [http-nio-1229-exec-10] c.s.c.a.config.CustomUserDetailsService  : Found admin with username: Admin
+2025-05-25T12:05:16.625+05:30  INFO 2500 --- [clinic-appointment] [http-nio-1229-exec-10] c.s.c.a.config.CustomUserDetailsService  : Found admin with username: Admin
