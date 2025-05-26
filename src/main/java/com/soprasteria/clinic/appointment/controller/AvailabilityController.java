@@ -58,7 +58,7 @@ public class AvailabilityController {
         return availabilityService.getDoctorAvailabilities(id,page,size);
     }
 
-    @PutMapping("/doctor/availability/{availabilityId}")
+    @PutMapping("/{availabilityId}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<?> updateAvailability(
             @Valid @RequestBody AvailabilityDTO availabilityDTO,
