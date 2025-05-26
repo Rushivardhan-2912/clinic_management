@@ -1,5 +1,6 @@
 package com.soprasteria.clinic.appointment.config;
 
+import com.soprasteria.clinic.appointment.exception.ClinicExceptionHandler;
 import io.jsonwebtoken.*;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,23 +26,33 @@ public class JwtService {
     private long expiration;
 
     @PostConstruct
-    public void loadKeys() throws Exception {
-        // Load private key
-        try (InputStream in = getClass().getResourceAsStream("/keys/private.pem")) {
-            String key = new String(in.readAllBytes()).replaceAll("-----\\w+ PRIVATE KEY-----", "").replaceAll("\\s+", "");
-            byte[] keyBytes = Base64.getDecoder().decode(key);
-            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            privateKey = kf.generatePrivate(spec);
-        }
+    public void loadKeys() {
+        try (InputStream privateKeyStream = getClass().getResourceAsStream("/keys/private.pem");
+             InputStream publicKeyStream = getClass().getResourceAsStream("/keys/public.pem")) {
 
-        // Load public key
-        try (InputStream in = getClass().getResourceAsStream("/keys/public.pem")) {
-            String key = new String(in.readAllBytes()).replaceAll("-----\\w+ PUBLIC KEY-----", "").replaceAll("\\s+", "");
-            byte[] keyBytes = Base64.getDecoder().decode(key);
-            X509EncodedKeySpec spec = new X509EncodedKeySpec(keyBytes);
-            KeyFactory kf = KeyFactory.getInstance("RSA");
-            publicKey = kf.generatePublic(spec);
+            if (privateKeyStream == null || publicKeyStream == null) {
+                throw new ClinicExceptionHandler.KeyLoadingException("Private or public key file not found in resources.");
+            }
+
+            // Load private key
+            String privateKeyContent = new String(privateKeyStream.readAllBytes())
+                    .replaceAll("-----\\w+ PRIVATE KEY-----", "")
+                    .replaceAll("\\s+", "");
+            byte[] privateKeyBytes = Base64.getDecoder().decode(privateKeyContent);
+            PKCS8EncodedKeySpec privateSpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+            privateKey = keyFactory.generatePrivate(privateSpec);
+
+            // Load public key
+            String publicKeyContent = new String(publicKeyStream.readAllBytes())
+                    .replaceAll("-----\\w+ PUBLIC KEY-----", "")
+                    .replaceAll("\\s+", "");
+            byte[] publicKeyBytes = Base64.getDecoder().decode(publicKeyContent);
+            X509EncodedKeySpec publicSpec = new X509EncodedKeySpec(publicKeyBytes);
+            publicKey = keyFactory.generatePublic(publicSpec);
+
+        } catch (Exception e) {
+            throw new ClinicExceptionHandler.KeyLoadingException("Failed to load RSA keys", e);
         }
     }
 

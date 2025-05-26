@@ -32,6 +32,16 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private static final Logger logger = LogManager.getLogger(AppointmentServiceImpl.class);
 
+    private static final String ERROR_BOOKING_APPOINTMENT ="Error booking appointment: %s";
+    private static final String ERROR_VIEWING_APPOINTMENT="Error viewing appointments for %s";
+    private static final String ERROR_RESCHEDULE_APPOINTMENT="Error rescheduling appointment %s";
+    private static final String ERROR_CANCEL_APPOINTMENT="Error cancelling appointment %s";
+    private static final String ROLE ="ROLE_ADMIN";
+    private static final String PAGE_NUMBER="pageNo";
+    private static final String PAGE_SIZE="pageSize";
+    private static final String TOTAL_RESULTS="totalResults";
+
+
     private final DoctorRepository doctorRepository;
     private final PatientRepository patientRepository;
     private final AppointmentRepository appointmentRepository;
@@ -59,7 +69,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             var auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isAdmin = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                    .anyMatch(a -> a.getAuthority().equals(ROLE));
 
             if (!(isAdmin || loggedInUsername.equals(patient.getUsername()))) {
                 throw new UnauthorizedAccessException(UNAUTHORIZED);
@@ -99,19 +109,19 @@ public class AppointmentServiceImpl implements AppointmentService {
             logger.info("Succesfully handled overlapping times");
             return ResponseEntity.status(HttpStatus.CREATED).body(globalMapper.toAppointmentDTO(saved));
         } catch (PatientNotFoundException e) {
-            logger.error("Error booking appointment", e.getMessage());
+            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (DoctorNotFoundException e) {
-            logger.error("Error booking appointment", e.getMessage());
+            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error("Error booking appointment", e.getMessage());
+            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (InvalidTimeSlotException e) {
-            logger.error("Error booking appointment", e.getMessage());
+            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error booking appointment", e);
+            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -123,7 +133,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         try {
             var auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isAdmin = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                    .anyMatch(a -> a.getAuthority().equals(ROLE));
 
             Patient patient = patientRepository.findById(patientId)
                     .orElseThrow(() -> new PatientNotFoundException(String.format(PATIENT_NOT_FOUND, patientId)));
@@ -138,19 +148,19 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("data", appointmentPage.getContent());
-            response.put("pageNo", appointmentPage.getNumber());
-            response.put("pageSize", appointmentPage.getSize());
-            response.put("totalResults", appointmentPage.getTotalElements());
+            response.put(PAGE_NUMBER, appointmentPage.getNumber());
+            response.put(PAGE_SIZE, appointmentPage.getSize());
+            response.put(TOTAL_RESULTS, appointmentPage.getTotalElements());
 
             return ResponseEntity.ok(response);
         } catch (PatientNotFoundException e) {
-            logger.error("Error viewing appointments for patient", e.getMessage());
+            logger.error(String.format(ERROR_VIEWING_APPOINTMENT),e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error("Error viewing appointments for patient", e.getMessage());
+            logger.error(String.format(ERROR_VIEWING_APPOINTMENT),e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error viewing appointments for patient", e.getMessage());
+            logger.error(String.format(ERROR_VIEWING_APPOINTMENT),e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -162,7 +172,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         try {
             var auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isAdmin = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                    .anyMatch(a -> a.getAuthority().equals(ROLE));
 
             Doctor doctor = doctorRepository.findById(doctorId)
                     .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND, doctorId)));
@@ -177,19 +187,19 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("data", appointmentPage.getContent());
-            response.put("pageNo", appointmentPage.getNumber());
-            response.put("pageSize", appointmentPage.getSize());
-            response.put("totalResults", appointmentPage.getTotalElements());
+            response.put(PAGE_NUMBER, appointmentPage.getNumber());
+            response.put(PAGE_SIZE, appointmentPage.getSize());
+            response.put(TOTAL_RESULTS, appointmentPage.getTotalElements());
 
             return ResponseEntity.ok(response);
         } catch (DoctorNotFoundException e) {
-            logger.error("Error viewing appointments for patient", e.getMessage());
+            logger.error(String.format(ERROR_VIEWING_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error("Error viewing appointments for patient", e.getMessage());
+            logger.error(String.format(ERROR_VIEWING_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error viewing appointments for doctor", e);
+            logger.error(String.format(ERROR_VIEWING_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -205,13 +215,13 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("data", appointmentPage.getContent());
-            response.put("pageNo", appointmentPage.getNumber());
-            response.put("pageSize", appointmentPage.getSize());
-            response.put("totalResults", appointmentPage.getTotalElements());
+            response.put(PAGE_NUMBER, appointmentPage.getNumber());
+            response.put(PAGE_SIZE, appointmentPage.getSize());
+            response.put(TOTAL_RESULTS, appointmentPage.getTotalElements());
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Error viewing all appointments", e);
+            logger.error(String.format(ERROR_VIEWING_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -227,7 +237,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             Patient patient = existing.getPatient();
             var auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isAdmin = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                    .anyMatch(a -> a.getAuthority().equals(ROLE));
 
             if (!(isAdmin || patient.getUsername().equals(loggedInUsername))) {
                 throw new UnauthorizedAccessException(UNAUTHORIZED);
@@ -279,16 +289,16 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             return ResponseEntity.ok(globalMapper.toAppointmentDTO(updated));
         } catch (AppointmentNotFoundException e) {
-            logger.error("Error rescheduling appointment", e.getMessage());
+            logger.error(String.format(ERROR_RESCHEDULE_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (InvalidTimeSlotException e) {
-            logger.error("Error rescheduling appointment", e.getMessage());
+            logger.error(String.format(ERROR_RESCHEDULE_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error("Error rescheduling appointment", e.getMessage());
+            logger.error(String.format(ERROR_RESCHEDULE_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error rescheduling appointment", e.getMessage());
+            logger.error(String.format(ERROR_RESCHEDULE_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -305,7 +315,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             var auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isAdmin = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                    .anyMatch(a -> a.getAuthority().equals(ROLE));
 
             if (!(isAdmin || appointment.getPatient().getUsername().equals(username))) {
                 throw new UnauthorizedAccessException(UNAUTHORIZED);
@@ -318,13 +328,13 @@ public class AppointmentServiceImpl implements AppointmentService {
             logger.info("Successfully cancelled appointment ID: {}", appointmentId);
             return ResponseEntity.ok("Appointment canceled successfully.");
         } catch (AppointmentNotFoundException e) {
-            logger.error("Error cancelling appointment", e.getMessage());
+            logger.error(String.format(ERROR_CANCEL_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error("Error cancelling appointment", e.getMessage());
+            logger.error(String.format(ERROR_CANCEL_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error cancelling appointment", e.getMessage());
+            logger.error(String.format(ERROR_CANCEL_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }

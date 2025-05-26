@@ -37,6 +37,11 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
     private static final Logger logger = LogManager.getLogger(AvailabilityServiceImpl.class);
 
+    private static final String ROLE ="ROLE_ADMIN";
+    private static final String ERROR_DELETING="Error deleting availability: %s";
+    private static final String ERROR_UPDATING="Error updating availability: {}";
+
+
     private final AvailabilityRepository availabilityRepository;
     private final GlobalMapper globalMapper;
     private final DoctorRepository doctorRepository;
@@ -58,7 +63,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
             var auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isAdmin = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                    .anyMatch(a -> a.getAuthority().equals(ROLE));
 
             if (!(isAdmin || doctor.getUsername().equals(loggedInUsername))) {
                 throw new UnauthorizedAccessException(UNAUTHORIZED);
@@ -108,7 +113,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
             var auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isAdmin = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                    .anyMatch(a -> a.getAuthority().equals(ROLE));
 
             Doctor doctor = availability.getDoctor();
 
@@ -140,13 +145,13 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             logger.info("updated availability successfully");
             return ResponseEntity.ok(globalMapper.toAvailabilityDTO(updated));
         } catch (UnauthorizedAccessException e) {
-            logger.error("Error updating availability: {}", e.getMessage());
+            logger.error(String.format(ERROR_UPDATING), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (AvailabilityNotFoundException e) {
-            logger.error("Error updating availability: {}", e.getMessage());
+            logger.error(String.format(ERROR_UPDATING), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error updating availability: {}", e.getMessage());
+            logger.error(String.format(ERROR_UPDATING), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -163,7 +168,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
             var auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isAdmin = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+                    .anyMatch(a -> a.getAuthority().equals(ROLE));
 
             if (!(isAdmin || availability.getDoctor().getId().equals(doctor.getId()))) {
                 throw new UnauthorizedAccessException(UNAUTHORIZED);
@@ -173,13 +178,13 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             availabilityRepository.deleteById(id);
             return ResponseEntity.ok("Availability deleted successfully with ID: " + id);
         } catch (UnauthorizedAccessException e) {
-            logger.error("Error deleting availability: {}", e.getMessage());
+            logger.error(String.format(ERROR_DELETING), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (AvailabilityNotFoundException | DoctorNotFoundException e) {
-            logger.error("Error deleting availability: {}", e.getMessage());
+            logger.error(String.format(ERROR_DELETING), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error deleting availability: {}", e.getMessage());
+            logger.error(String.format(ERROR_DELETING), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -206,7 +211,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error("Error retrieving availabilities", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to fetch availabilities");
         }
     }

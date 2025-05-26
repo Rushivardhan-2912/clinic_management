@@ -1,7 +1,6 @@
 package com.soprasteria.clinic.appointment.dto;
 
 import jakarta.persistence.Column;
-import jakarta.validation.constraints.NotBlank;
 
 public class DoctorDTO {
 

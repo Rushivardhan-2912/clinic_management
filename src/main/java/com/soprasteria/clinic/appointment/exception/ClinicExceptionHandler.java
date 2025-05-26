@@ -51,6 +51,11 @@ public class ClinicExceptionHandler {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(KeyLoadingException.class)
+    public ResponseEntity<?> handleJwtException(KeyLoadingException ex) {
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage());
+    }
+
     // Bad Credentials Exception Handler
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<?> handleBadCredentials(BadCredentialsException ex) {
@@ -70,7 +75,7 @@ public class ClinicExceptionHandler {
 
     // Utility method to construct the response
     private ResponseEntity<?> buildResponse(HttpStatus status, String message) {
-         // Only send the message, not the stack trace
+        // Only send the message, not the stack trace
         return ResponseEntity.status(status).body(message);
     }
 
@@ -78,37 +83,61 @@ public class ClinicExceptionHandler {
 
     // Patient Not Found Exception
     public static class PatientNotFoundException extends RuntimeException {
-        public PatientNotFoundException(String message) { super(message); }
+        public PatientNotFoundException(String message) {
+            super(message);
+        }
     }
 
     // Doctor Not Found Exception
     public static class DoctorNotFoundException extends RuntimeException {
-        public DoctorNotFoundException(String message) { super(message); }
+        public DoctorNotFoundException(String message) {
+            super(message);
+        }
     }
 
     // Appointment Not Found Exception
     public static class AppointmentNotFoundException extends RuntimeException {
-        public AppointmentNotFoundException(String message) { super(message); }
+        public AppointmentNotFoundException(String message) {
+            super(message);
+        }
     }
 
     // Availability Not Found Exception
     public static class AvailabilityNotFoundException extends RuntimeException {
-        public AvailabilityNotFoundException(String message) { super(message); }
+        public AvailabilityNotFoundException(String message) {
+            super(message);
+        }
     }
 
     // Invalid Time Slot Exception
     public static class InvalidTimeSlotException extends RuntimeException {
-        public InvalidTimeSlotException(String message) { super(message); }
+        public InvalidTimeSlotException(String message) {
+            super(message);
+        }
     }
 
     // Bad Credentials Exception (for authentication issues)
     public static class BadCredentialsException extends RuntimeException {
-        public BadCredentialsException(String message) { super(message); }
+        public BadCredentialsException(String message) {
+            super(message);
+        }
     }
 
     // Unauthorized Access Exception (when users attempt restricted actions)
     public static class UnauthorizedAccessException extends RuntimeException {
-        public UnauthorizedAccessException(String message) { super(message); }
+        public UnauthorizedAccessException(String message) {
+            super(message);
+        }
+    }
+
+    public static class KeyLoadingException extends RuntimeException {
+        public KeyLoadingException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public KeyLoadingException(String message) {
+            super(message);
+        }
     }
 
 }
