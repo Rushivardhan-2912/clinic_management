@@ -26,9 +26,7 @@ public class TimeBasedStatusUpdater {
         this.appointmentRepository = appointmentRepository;
     }
 
-    // Runs at 12:00 AM and 12:00 PM every day.
-
-    @Scheduled(cron = "0 0 0,12 * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     @Transactional
     public void cleanOldData() {
 

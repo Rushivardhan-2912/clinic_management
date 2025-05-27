@@ -37,10 +37,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
 
 	@Modifying
-	@Query("UPDATE Appointment a SET a.status = 'COMPLETED' " +
-			"WHERE (a.date < :today) " +
-			"OR (a.date = :today AND a.endTime < :nowTime) " +
-			"AND a.status = 'BOOKED'")
+	@Query("UPDATE Appointment a SET a.status = StatusEnum.EXPIRED " +
+			"WHERE ((a.date < :today) OR (a.date = :today AND a.endTime < :nowTime)) " +
+			"AND a.status = StatusEnum.AVAILABLE")
 	int markPastAsExpired(@Param("today") LocalDate today,
 						  @Param("nowTime") LocalTime nowTime);
 

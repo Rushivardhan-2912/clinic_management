@@ -93,10 +93,9 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
 
 
     @Modifying
-    @Query("UPDATE Availability a SET a.status = 'EXPIRED' " +
-            "WHERE (a.date < :today) " +
-            "OR (a.date = :today AND a.endTime < :nowTime) " +
-            "AND a.status = 'AVAILABLE'")
+    @Query("UPDATE Availability a SET a.status = StatusEnum.EXPIRED " +
+            "WHERE ((a.date < :today) OR (a.date = :today AND a.endTime < :nowTime)) " +
+            "AND a.status = StatusEnum.AVAILABLE")
     int markPastAsExpired(@Param("today") LocalDate today,
                           @Param("nowTime") LocalTime nowTime);
 
