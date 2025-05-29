@@ -9,8 +9,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
-        info = @Info(title = "Clinic Appointment API", version = "v1"),
-        security = @SecurityRequirement(name = "bearerAuth")
+        info = @Info(title = "Clinic Appointment API", version = "v1")
 )
 @SecurityScheme(
         name = "bearerAuth",

@@ -39,7 +39,7 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     private static final Logger logger = LogManager.getLogger(AvailabilityServiceImpl.class);
 
     private static final String ROLE ="ROLE_ADMIN";
-    private static final String ERROR_DELETING="Error deleting availability: %s";
+    private static final String ERROR_DELETING="Error deleting availability: {}";
     private static final String ERROR_UPDATING="Error updating availability: {}";
 
 
@@ -222,7 +222,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             response.put("pageSize", availabilityPage.getSize());
             response.put("totalResults", availabilityPage.getTotalElements());
             response.put("totalPages", availabilityPage.getTotalPages());
-            response.put("last", availabilityPage.isLast());
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {

@@ -25,7 +25,6 @@ public class AppointmentDTO {
     private LocalTime endTime;
 
 	@Enumerated(EnumType.STRING)
-	@NotNull(message = "Status is mandatory")
     private StatusEnum status;
     
     private PatientDTO patient;

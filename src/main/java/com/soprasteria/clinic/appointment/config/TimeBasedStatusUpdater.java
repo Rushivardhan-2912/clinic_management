@@ -26,7 +26,7 @@ public class TimeBasedStatusUpdater {
         this.appointmentRepository = appointmentRepository;
     }
 
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "0 0 12 * * ?")
     @Transactional
     public void cleanOldData() {
 

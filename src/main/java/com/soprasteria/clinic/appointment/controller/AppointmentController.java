@@ -26,7 +26,7 @@ public class AppointmentController {
 		this.appointmentService = appointmentService;
 	}
 
-	@PostMapping("/{id}")
+	@PostMapping("/patient/{id}")
 	@PreAuthorize("hasAnyRole('ADMIN','PATIENT')")
 	public ResponseEntity<?> bookAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO,
 											 @PathVariable Long id,
