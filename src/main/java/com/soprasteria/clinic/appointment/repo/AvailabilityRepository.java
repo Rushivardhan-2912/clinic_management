@@ -19,9 +19,6 @@ public interface AvailabilityRepository extends JpaRepository<Availability, Long
 
     Page<Availability> findByDoctorId(Long doctorId, Pageable pageable);
 
-    @Query("SELECT a FROM Availability a WHERE a.doctor.id = :doctorId")
-    List<Availability> findByDoctorId(@Param("doctorId") Long doctorId);
-
     // Check if a time slot is available for a doctor
     @Query("SELECT CASE WHEN COUNT(a) > 0 THEN true ELSE false END " +
             "FROM Availability a " +

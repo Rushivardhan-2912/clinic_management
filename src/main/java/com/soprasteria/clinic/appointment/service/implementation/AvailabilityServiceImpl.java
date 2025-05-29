@@ -25,6 +25,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -73,8 +74,15 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             LocalTime endTime = availabilityDTO.getEndTime();
             LocalDate date = availabilityDTO.getDate();
 
-            if (startTime != null && endTime != null && !endTime.isAfter(startTime)) {
-                return ResponseEntity.badRequest().body("Start time must be before end time.");
+            LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+            LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+
+            if (startDateTime.isBefore(LocalDateTime.now())) {
+                return ResponseEntity.badRequest().body("Start time must be in the future.");
+            }
+
+            if (!endDateTime.isAfter(startDateTime)) {
+                return ResponseEntity.badRequest().body("End time must be after start time.");
             }
 
             // Check for overlapping time slot
@@ -126,8 +134,15 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             LocalDate date = availabilityDTO.getDate();
 
             if (startTime != null && endTime != null && date != null) {
-                if (startTime.isAfter(endTime)) {
-                    return ResponseEntity.badRequest().body("Start time cannot be after end time.");
+                LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+                LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+
+                if (startDateTime.isBefore(LocalDateTime.now())) {
+                    return ResponseEntity.badRequest().body("Start time must be in the future.");
+                }
+
+                if (!endDateTime.isAfter(startDateTime)) {
+                    return ResponseEntity.badRequest().body("End time must be after start time.");
                 }
 
                 if (hasOverlappingAvailabilityForUpdate(doctor.getId(), availabilityId, date, startTime, endTime)) {
@@ -151,8 +166,8 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             logger.error(String.format(ERROR_UPDATING), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            logger.error(String.format(ERROR_UPDATING), e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+            logger.error("Error adding availability: {}", e.getMessage(), e); // <-- include stack trace
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred while adding availability.");
         }
     }
 

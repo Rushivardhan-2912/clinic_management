@@ -4,7 +4,6 @@ package com.soprasteria.clinic.appointment.dto;
 import com.soprasteria.clinic.appointment.entity.StatusEnum;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
@@ -20,11 +19,9 @@ public class AppointmentDTO {
 	private LocalDate date;
 
 	@NotNull(message = "Start time cannot be null")
-	@Future(message = "Appointment time must be future")
     private LocalTime startTime;
 
 	@NotNull(message = "End time cannot be null")
-	@Future(message = "Appointment time must be future")
     private LocalTime endTime;
 
 	@Enumerated(EnumType.STRING)

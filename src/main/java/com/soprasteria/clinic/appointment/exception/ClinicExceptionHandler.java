@@ -4,6 +4,9 @@ import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.servlet.NoHandlerFoundException;
+
+import static com.soprasteria.clinic.appointment.util.GenericMessages.RESOURCE_NOT_FOUND;
 
 @RestControllerAdvice
 public class ClinicExceptionHandler {
@@ -12,6 +15,12 @@ public class ClinicExceptionHandler {
     @ExceptionHandler(PatientNotFoundException.class)
     public ResponseEntity<?> handlePatientNotFound(PatientNotFoundException ex) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<?> handleNoHandlerFound(NoHandlerFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(RESOURCE_NOT_FOUND);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

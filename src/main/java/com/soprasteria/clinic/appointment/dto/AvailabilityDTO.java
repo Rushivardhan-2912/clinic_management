@@ -4,7 +4,6 @@ import com.soprasteria.clinic.appointment.entity.StatusEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
@@ -21,11 +20,9 @@ public class AvailabilityDTO {
 
 
 	@NotNull(message = "Availability start time cannot be null")
-	@Future(message = "Availability time must be future")
 	private LocalTime startTime;
 
 	@NotNull(message = "Availability end time cannot be null")
-	@Future(message = "Availability time must be future")
 	private LocalTime endTime;
 
 	@Enumerated(EnumType.STRING)

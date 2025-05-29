@@ -3,6 +3,7 @@ package com.soprasteria.clinic.appointment.util;
 public class GenericMessages {
     private GenericMessages() {}
 
+    public static final String RESOURCE_NOT_FOUND="The requested resource was not found";
     public static final String USER_NOT_FOUND = "User with ID '%s' not found";
     public static final String FAILED_REGISTRATION="Failed to register.";
     public static final String ALREADY_EXISTING="%s already existed.";

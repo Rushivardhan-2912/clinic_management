@@ -5,7 +5,6 @@ import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 
@@ -22,11 +21,9 @@ public class Appointment {
     private LocalDate date;
 
     @NotNull(message = "Start time cannot be null")
-    @Future(message = "Appointment time must be future")
     private LocalTime startTime;
 
     @NotNull(message = "End time cannot be null")
-    @Future(message = "Appointment time must be future")
     private LocalTime endTime;
 
     @Enumerated(EnumType.STRING)

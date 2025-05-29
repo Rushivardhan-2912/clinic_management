@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -84,7 +85,14 @@ public class AppointmentServiceImpl implements AppointmentService {
             LocalTime startTime = appointmentDTO.getStartTime();
             LocalTime endTime = appointmentDTO.getEndTime();
 
-            if (startTime == null || endTime == null || !endTime.isAfter(startTime)) {
+            LocalDateTime startDateTime = LocalDateTime.of(date, startTime);
+            LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
+
+            if (startDateTime.isBefore(LocalDateTime.now())) {
+                return ResponseEntity.badRequest().body("Start time must be in the future.");
+            }
+
+            if (!endDateTime.isAfter(startDateTime)) {
                 throw new InvalidTimeSlotException(INVALID_TIME_RANGE);
             }
 
@@ -247,7 +255,14 @@ public class AppointmentServiceImpl implements AppointmentService {
             LocalTime newStart = appointmentDTO.getStartTime();
             LocalTime newEnd = appointmentDTO.getEndTime();
 
-            if (newStart == null || newEnd == null || !newEnd.isAfter(newStart)) {
+            LocalDateTime startDateTime = LocalDateTime.of(newDate, newStart);
+            LocalDateTime endDateTime = LocalDateTime.of(newDate, newEnd);
+
+            if (startDateTime.isBefore(LocalDateTime.now()) && endDateTime.isBefore(LocalDateTime.now())) {
+                return ResponseEntity.badRequest().body(INVALID_TIME_RANGE);
+            }
+
+            if (!newEnd.isAfter(newStart)) {
                 throw new InvalidTimeSlotException(INVALID_TIME_RANGE);
             }
 
