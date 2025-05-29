@@ -98,7 +98,7 @@ public class DoctorServiceImpl implements DoctorService {
 
             if (!(isAdmin || existingDoctor.getUsername().equals(loginUsername))) {
                 logger.warn("Unauthorized update attempt by user: {}", loginUsername);
-                return new ResponseEntity<>(new UnauthorizedAccessException(UNAUTHORIZED), HttpStatus.UNAUTHORIZED);
+                throw new UnauthorizedAccessException(UNAUTHORIZED);
             }
 
             BeanUtils.copyProperties(updatedDoctorDTO, existingDoctor, NullPropertyUtils.getNullPropertyNames(updatedDoctorDTO));
@@ -107,7 +107,10 @@ public class DoctorServiceImpl implements DoctorService {
             return ResponseEntity.ok(globalMapper.toDoctorDTO(savedDoctor));
         } catch (DoctorNotFoundException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
+        } catch (UnauthorizedAccessException e){
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+        catch (Exception e) {
             logger.error("Error updating doctor", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Update failed");
         }

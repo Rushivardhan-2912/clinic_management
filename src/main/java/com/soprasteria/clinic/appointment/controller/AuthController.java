@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("${api.base.path}/auth")
 public class AuthController {
 
     private static final Logger logger = LogManager.getLogger(AuthController.class);

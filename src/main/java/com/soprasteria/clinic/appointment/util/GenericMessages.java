@@ -17,6 +17,8 @@ public class GenericMessages {
 
     //Availability-related
     public static final String AVAILABILITY_NOT_FOUND = "Availability not found with ID: %s";
+    public static final String START_TIME="Start time must be in the future.";
+    public static final String END_TIME="End time must be after start time.";
 
     // Appointment-related
     public static final String APPOINTMENT_NOT_FOUND = "Appointment not found with ID: %s";

@@ -1,8 +1,5 @@
 package com.soprasteria.clinic.appointment.entity;
 
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
@@ -45,11 +42,6 @@ public class Patient {
     @Column(nullable = true) // make it nullable temporarily
     @Enumerated(EnumType.STRING)
     private RoleEnum role = RoleEnum.PATIENT;
-
-    // One-to-many relationship with Appointment
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    @JsonManagedReference("appointment-patient")  // Same unique name as in Appointment entity
-    private List<Appointment> appointments;
 
     // Getters and Setters
     public Long getId() {
@@ -106,14 +98,6 @@ public class Patient {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public List<Appointment> getAppointments() {
-        return appointments;
-    }
-
-    public void setAppointments(List<Appointment> appointments) {
-        this.appointments = appointments;
     }
 
     public RoleEnum getRole() {

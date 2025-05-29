@@ -33,10 +33,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     private static final Logger logger = LogManager.getLogger(AppointmentServiceImpl.class);
 
-    private static final String ERROR_BOOKING_APPOINTMENT ="Error booking appointment: %s";
-    private static final String ERROR_VIEWING_APPOINTMENT="Error viewing appointments for %s";
-    private static final String ERROR_RESCHEDULE_APPOINTMENT="Error rescheduling appointment %s";
-    private static final String ERROR_CANCEL_APPOINTMENT="Error cancelling appointment %s";
     private static final String ROLE ="ROLE_ADMIN";
     private static final String PAGE_NUMBER="pageNo";
     private static final String PAGE_SIZE="pageSize";
@@ -117,19 +113,14 @@ public class AppointmentServiceImpl implements AppointmentService {
             logger.info("Succesfully handled overlapping times");
             return ResponseEntity.status(HttpStatus.CREATED).body(globalMapper.toAppointmentDTO(saved));
         } catch (PatientNotFoundException e) {
-            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (DoctorNotFoundException e) {
-            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (InvalidTimeSlotException e) {
-            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            logger.error(String.format(ERROR_BOOKING_APPOINTMENT,e.getMessage()));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -162,13 +153,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             return ResponseEntity.ok(response);
         } catch (PatientNotFoundException e) {
-            logger.error(String.format(ERROR_VIEWING_APPOINTMENT),e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error(String.format(ERROR_VIEWING_APPOINTMENT),e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            logger.error(String.format(ERROR_VIEWING_APPOINTMENT),e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -201,13 +189,10 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             return ResponseEntity.ok(response);
         } catch (DoctorNotFoundException e) {
-            logger.error(String.format(ERROR_VIEWING_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error(String.format(ERROR_VIEWING_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            logger.error(String.format(ERROR_VIEWING_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -229,7 +214,6 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            logger.error(String.format(ERROR_VIEWING_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -268,7 +252,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
             Doctor doctor = existing.getDoctor();
 
-            // Step 1: Check overlapping availability (not just containment)
+            // Step 1: Check overlapping availability
             List<Availability> overlappingAvailabilities = availabilityRepository.findOverlappingAvailabilities(
                     doctor.getId(), newDate, newStart, newEnd
             );
@@ -281,14 +265,23 @@ public class AppointmentServiceImpl implements AppointmentService {
                 throw new InvalidTimeSlotException(TIME_SLOT_NOT_AVAILABLE);
             }
 
-            // Step 3: Restore the previous time slot as available
-            Availability old = new Availability();
-            old.setDoctor(doctor);
-            old.setDate(existing.getDate());
-            old.setStartTime(existing.getStartTime());
-            old.setEndTime(existing.getEndTime());
-            old.setStatus(StatusEnum.AVAILABLE);
-            availabilityRepository.save(old);
+            // Step 3: Restore the previous time slot as available, if not already present
+            Availability existingAvailability = availabilityRepository
+                    .findByDoctorAndDateAndTime(
+                            doctor.getId(), existing.getDate(), existing.getStartTime(), existing.getEndTime());
+
+            if (existingAvailability!=null) {
+                existingAvailability.setStatus(StatusEnum.AVAILABLE);
+                availabilityRepository.save(existingAvailability);
+            } else {
+                Availability old = new Availability();
+                old.setDoctor(doctor);
+                old.setDate(existing.getDate());
+                old.setStartTime(existing.getStartTime());
+                old.setEndTime(existing.getEndTime());
+                old.setStatus(StatusEnum.AVAILABLE);
+                availabilityRepository.save(old);
+            }
 
             // Step 4: Update appointment details
             existing.setDate(newDate);
@@ -299,21 +292,17 @@ public class AppointmentServiceImpl implements AppointmentService {
             logger.info("Successfully rescheduled appointment ID: {} to date: {}, start: {}, end: {}",
                     appointmentId, newDate, newStart, newEnd);
 
-            // Step 5: Handle overlapping availability updates
+            // Step 5: Handle overlapping availability
             handleOverlappingAvailabilities(doctor, newDate, newStart, newEnd);
 
             return ResponseEntity.ok(globalMapper.toAppointmentDTO(updated));
         } catch (AppointmentNotFoundException e) {
-            logger.error(String.format(ERROR_RESCHEDULE_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (InvalidTimeSlotException e) {
-            logger.error(String.format(ERROR_RESCHEDULE_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error(String.format(ERROR_RESCHEDULE_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            logger.error(String.format(ERROR_RESCHEDULE_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
@@ -343,13 +332,10 @@ public class AppointmentServiceImpl implements AppointmentService {
             logger.info("Successfully cancelled appointment ID: {}", appointmentId);
             return ResponseEntity.ok("Appointment canceled successfully.");
         } catch (AppointmentNotFoundException e) {
-            logger.error(String.format(ERROR_CANCEL_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (UnauthorizedAccessException e) {
-            logger.error(String.format(ERROR_CANCEL_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (Exception e) {
-            logger.error(String.format(ERROR_CANCEL_APPOINTMENT), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }

@@ -39,9 +39,6 @@ public class AvailabilityServiceImpl implements AvailabilityService {
     private static final Logger logger = LogManager.getLogger(AvailabilityServiceImpl.class);
 
     private static final String ROLE ="ROLE_ADMIN";
-    private static final String ERROR_DELETING="Error deleting availability: {}";
-    private static final String ERROR_UPDATING="Error updating availability: {}";
-
 
     private final AvailabilityRepository availabilityRepository;
     private final GlobalMapper globalMapper;
@@ -78,11 +75,11 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
 
             if (startDateTime.isBefore(LocalDateTime.now())) {
-                return ResponseEntity.badRequest().body("Start time must be in the future.");
+                return ResponseEntity.badRequest().body(START_TIME);
             }
 
             if (!endDateTime.isAfter(startDateTime)) {
-                return ResponseEntity.badRequest().body("End time must be after start time.");
+                return ResponseEntity.badRequest().body(END_TIME);
             }
 
             // Check for overlapping time slot
@@ -100,13 +97,10 @@ public class AvailabilityServiceImpl implements AvailabilityService {
 
             return ResponseEntity.status(HttpStatus.CREATED).body(globalMapper.toAvailabilityDTO(saved));
         } catch (UnauthorizedAccessException e) {
-            logger.error("Error adding availability : {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (DoctorNotFoundException e) {
-            logger.error("Error adding availability : {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            logger.error("Error adding availability: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Unexpected error occurred while adding availability.");
         }
@@ -138,11 +132,11 @@ public class AvailabilityServiceImpl implements AvailabilityService {
                 LocalDateTime endDateTime = LocalDateTime.of(date, endTime);
 
                 if (startDateTime.isBefore(LocalDateTime.now())) {
-                    return ResponseEntity.badRequest().body("Start time must be in the future.");
+                    return ResponseEntity.badRequest().body(START_TIME);
                 }
 
                 if (!endDateTime.isAfter(startDateTime)) {
-                    return ResponseEntity.badRequest().body("End time must be after start time.");
+                    return ResponseEntity.badRequest().body(END_TIME);
                 }
 
                 if (hasOverlappingAvailabilityForUpdate(doctor.getId(), availabilityId, date, startTime, endTime)) {
@@ -160,14 +154,10 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             logger.info("updated availability successfully");
             return ResponseEntity.ok(globalMapper.toAvailabilityDTO(updated));
         } catch (UnauthorizedAccessException e) {
-            logger.error(String.format(ERROR_UPDATING), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (AvailabilityNotFoundException e) {
-            logger.error(String.format(ERROR_UPDATING), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            logger.error("Error adding availability: {}", e.getMessage(), e); // <-- include stack trace
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred while adding availability.");
+        } catch (Exception e) {return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Unexpected error occurred while adding availability.");
         }
     }
 
@@ -178,28 +168,29 @@ public class AvailabilityServiceImpl implements AvailabilityService {
             Availability availability = availabilityRepository.findById(id)
                     .orElseThrow(() -> new AvailabilityNotFoundException(String.format(AVAILABILITY_NOT_FOUND, id)));
 
-            Doctor doctor = doctorRepository.findByUsername(username)
-                    .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND, username)));
-
             var auth = SecurityContextHolder.getContext().getAuthentication();
             boolean isAdmin = auth.getAuthorities().stream()
-                    .anyMatch(a -> a.getAuthority().equals(ROLE));
+                    .anyMatch(a -> a.getAuthority().equals(ROLE)); // ROLE_ADMIN or whatever your role string is
 
-            if (!(isAdmin || availability.getDoctor().getId().equals(doctor.getId()))) {
-                throw new UnauthorizedAccessException(UNAUTHORIZED);
+            Doctor doctor = null;
+            if (!isAdmin) {
+                doctor = doctorRepository.findByUsername(username)
+                        .orElseThrow(() -> new DoctorNotFoundException(String.format(DOCTOR_NOT_FOUND, username)));
+                if (!availability.getDoctor().getId().equals(doctor.getId())) {
+                    throw new UnauthorizedAccessException(UNAUTHORIZED);
+                }
             }
 
-            logger.info("Trying to delete availability with id: {}",id);
+            // Admins can delete any availability without doctor check
+            logger.info("Trying to delete availability with id: {}", id);
             availabilityRepository.deleteById(id);
             return ResponseEntity.ok("Availability deleted successfully with ID: " + id);
+
         } catch (UnauthorizedAccessException e) {
-            logger.error(String.format(ERROR_DELETING), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         } catch (AvailabilityNotFoundException | DoctorNotFoundException e) {
-            logger.error(String.format(ERROR_DELETING), e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            logger.error(String.format(ERROR_DELETING), e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }

@@ -15,7 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/availabilities")
+@RequestMapping("${api.base.path}/availabilities")
 @SecurityRequirement( name = "bearerAuth")
 public class AvailabilityController {
 
@@ -68,7 +68,7 @@ public class AvailabilityController {
         return availabilityService.updateAvailability(availabilityDTO, availabilityId, authentication.getName());
     }
 
-    @DeleteMapping("/doctor/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','DOCTOR')")
     public ResponseEntity<?> deleteAvailability(
             @PathVariable Long id,

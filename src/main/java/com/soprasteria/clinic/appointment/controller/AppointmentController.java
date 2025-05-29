@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/appointments")
+@RequestMapping("${api.base.path}/appointments")
 @SecurityRequirement( name = "bearerAuth")
 public class AppointmentController {
 

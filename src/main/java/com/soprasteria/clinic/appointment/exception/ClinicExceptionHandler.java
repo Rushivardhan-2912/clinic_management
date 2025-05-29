@@ -1,6 +1,8 @@
 package com.soprasteria.clinic.appointment.exception;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import org.springframework.http.*;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.validation.FieldError;
@@ -34,6 +36,25 @@ public class ClinicExceptionHandler {
                 .orElse("Invalid input");
 
         return ResponseEntity.badRequest().body(errorMessage);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<String> handleInvalidFormat(HttpMessageNotReadableException ex) {
+        if (ex.getCause() instanceof InvalidFormatException cause) {
+            Class<?> targetType = cause.getTargetType();
+
+            if (targetType.equals(java.time.LocalDate.class)) {
+                return ResponseEntity.badRequest()
+                        .body("Invalid date format: Day must not exceed 31. Please use yyyy-MM-dd.");
+            }
+
+            if (targetType.equals(java.time.LocalTime.class)) {
+                return ResponseEntity.badRequest()
+                        .body("Invalid time format: Please use HH:mm:ss with valid hour (0–23), minute (0–59), and second (0–59).");
+            }
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Invalid request: " + ex.getMessage());
     }
 
     // Doctor Not Found Exception Handler
