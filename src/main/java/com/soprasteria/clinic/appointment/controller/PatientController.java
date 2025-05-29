@@ -15,7 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("${api.base.path}/patients")
+@RequestMapping("/patients")
 public class PatientController {
 
 	private static final Logger logger = LogManager.getLogger(PatientController.class);

@@ -15,7 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("${api.base.path}/availabilities")
+@RequestMapping("/availabilities")
 @SecurityRequirement( name = "bearerAuth")
 public class AvailabilityController {
 

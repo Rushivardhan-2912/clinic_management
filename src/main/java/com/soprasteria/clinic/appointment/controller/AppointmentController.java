@@ -14,7 +14,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("${api.base.path}/appointments")
+@RequestMapping("/appointments")
 @SecurityRequirement( name = "bearerAuth")
 public class AppointmentController {
 
@@ -65,7 +65,7 @@ public class AppointmentController {
 
 	@PutMapping("/{appointmentId}")
 	@PreAuthorize("hasAnyRole('ADMIN','PATIENT')")
-	public ResponseEntity<?> updateAppointment(@RequestBody AppointmentDTO appointmentDTO,
+	public ResponseEntity<?> updateAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO,
 											   @PathVariable Long appointmentId,
 											   Authentication authentication) {
 		logger.info("Attempting to update appointment ID: {}", appointmentId);

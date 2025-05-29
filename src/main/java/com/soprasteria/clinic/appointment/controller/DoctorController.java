@@ -16,7 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @RestController
-@RequestMapping("${api.base.path}/doctors")
+@RequestMapping("/doctors")
 @SecurityRequirement( name = "bearerAuth")
 public class DoctorController {
 

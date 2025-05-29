@@ -93,6 +93,21 @@ public class PatientServiceImpl implements PatientService {
     @Transactional
     public ResponseEntity<?> updatePatient(PatientDTO updatedPatientDTO, Long patientId, String loggedInUsername) {
         try {
+            // Only validate fields that are explicitly present and are null or empty
+            if (updatedPatientDTO.getName() != null && updatedPatientDTO.getName().trim().isEmpty()) {
+                throw new IllegalArgumentException("Name should not be null");
+            }
+            if (updatedPatientDTO.getEmail() != null && updatedPatientDTO.getEmail().trim().isEmpty()) {
+                throw new IllegalArgumentException("Email should not be null");
+            }
+            if (updatedPatientDTO.getPhoneNumber() != null && updatedPatientDTO.getPhoneNumber().trim().isEmpty()) {
+                throw new IllegalArgumentException("Phone number should not be null");
+            }
+
+            if(updatedPatientDTO.getUsername() !=null && updatedPatientDTO.getUsername().trim().isEmpty()){
+                throw new IllegalArgumentException("Username should not be null");
+            }
+
             Patient existingPatient = patientRepository.findById(patientId)
                     .orElseThrow(() -> {
                         logger.error("Patient not found with ID: {}", patientId);
@@ -104,12 +119,13 @@ public class PatientServiceImpl implements PatientService {
                     .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
             if (!(existingPatient.getUsername().equals(loggedInUsername) || isAdmin)) {
-                logger.warn("User {} attempted to update data for another patient: {}", loggedInUsername, existingPatient.getUsername());
+                logger.warn("User {} attempted to update another patient: {}", loggedInUsername, existingPatient.getUsername());
                 throw new ClinicExceptionHandler.UnauthorizedAccessException(UNAUTHORIZED);
             }
 
-
             logger.info("Updating patient data for ID: {}", patientId);
+
+            // Update only non-null properties from DTO to entity
             BeanUtils.copyProperties(updatedPatientDTO, existingPatient, NullPropertyUtils.getNullPropertyNames(updatedPatientDTO));
 
             Patient savedPatient = patientRepository.save(existingPatient);
@@ -117,7 +133,7 @@ public class PatientServiceImpl implements PatientService {
             return ResponseEntity.ok(globalMapper.toPatientDTO(savedPatient));
         } catch (ClinicExceptionHandler.UnauthorizedAccessException e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-        } catch (PatientNotFoundException e) {
+        } catch (PatientNotFoundException | IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
             logger.error("Error updating patient", e);

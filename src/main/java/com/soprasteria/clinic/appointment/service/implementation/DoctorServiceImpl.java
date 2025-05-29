@@ -86,6 +86,18 @@ public class DoctorServiceImpl implements DoctorService {
     @Transactional
     public ResponseEntity<?> updateDoctor(DoctorDTO updatedDoctorDTO, Long doctorId, String loginUsername) {
         try {
+            if (updatedDoctorDTO.getName() != null && updatedDoctorDTO.getName().trim().isEmpty()) {
+                throw new IllegalArgumentException("Name should not be null");
+            }
+
+            if (updatedDoctorDTO.getSpecialization()!=null && updatedDoctorDTO.getSpecialization().trim().isEmpty()){
+                throw new IllegalArgumentException("Specialization should not be null");
+            }
+
+            if (updatedDoctorDTO.getUsername()!=null && updatedDoctorDTO.getUsername().trim().isEmpty()){
+                throw new IllegalArgumentException("Username should not be null");
+            }
+
             Doctor existingDoctor = doctorRepository.findById(doctorId)
                     .orElseThrow(() -> {
                         logger.error("Doctor not found with ID: {}", doctorId);

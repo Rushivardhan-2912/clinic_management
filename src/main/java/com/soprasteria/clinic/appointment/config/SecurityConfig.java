@@ -48,13 +48,14 @@ public class SecurityConfig {
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.exceptionHandling(e -> {}) // optional, or remove entirely if not needed
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers(HttpMethod.POST, "/api/v1/patients").permitAll()
+						.requestMatchers(
+								HttpMethod.POST,"/patients").permitAll()
 						.requestMatchers(
 								"/swagger-ui.html",
 								"/swagger-ui/**",
 								"/v3/api-docs/**",
 								"/swagger-resources/**",
-								"/api/v1/auth/**",
+								"/auth/**", // Now safe to keep, useful for other GETs
 								"/actuator/**"
 						).permitAll()
 						.anyRequest().authenticated())
