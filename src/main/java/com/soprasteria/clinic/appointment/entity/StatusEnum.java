@@ -5,5 +5,6 @@ public enum StatusEnum {
     CANCELLED,
     AVAILABLE,
     RESCHEDULED,
-    EXPIRED
+    EXPIRED,
+    COMPLETED
 }

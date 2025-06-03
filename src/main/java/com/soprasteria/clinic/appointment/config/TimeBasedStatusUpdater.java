@@ -5,6 +5,7 @@ import com.soprasteria.clinic.appointment.repo.AvailabilityRepository;
 import jakarta.transaction.Transactional;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -26,7 +27,11 @@ public class TimeBasedStatusUpdater {
         this.appointmentRepository = appointmentRepository;
     }
 
-    @Scheduled(cron = "0 0 12 * * ?")
+    @Value("${scheduler.cron.expression}")
+    private String cronExpression;
+
+
+    @Scheduled(cron = "${scheduler.cron.expression}")
     @Transactional
     public void cleanOldData() {
 
