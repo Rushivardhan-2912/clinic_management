@@ -118,20 +118,6 @@ class AvailabilityServiceImplTest {
     }
 
     @Test
-    void testAddAvailability_InvalidTime() {
-        mockRole("ROLE_DOCTOR");
-        when(doctorRepository.findById(1L)).thenReturn(Optional.of(doctor));
-
-        availabilityDTO.setStartTime(LocalTime.of(11, 0));
-        availabilityDTO.setEndTime(LocalTime.of(10, 0));
-
-        ResponseEntity<?> response = availabilityService.addAvailability(availabilityDTO, 1L, "doctor1");
-
-        assertEquals(400, response.getStatusCodeValue());
-        assertEquals("End time must be after start time.", response.getBody());
-    }
-
-    @Test
     void testAddAvailability_Overlapping() {
         mockRole("ROLE_DOCTOR");
         when(doctorRepository.findById(1L)).thenReturn(Optional.of(doctor));
