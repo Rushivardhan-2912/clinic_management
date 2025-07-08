@@ -1,11 +1,7 @@
 package com.soprasteria.clinic.appointment.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.soprasteria.clinic.appointment.util.Role;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-
-import java.util.List;
 
 @Entity
 public class Doctor {
@@ -16,30 +12,21 @@ public class Doctor {
     private Long id;
 
     @NotBlank(message = "Name is mandatory")
-    private String doctorName;
+    private String name;
 
     @NotBlank(message = "Specialization is mandatory")
-    private String doctorSpecialization;
+    private String specialization;
 
     @NotBlank(message = "Username is mandatory")
     @Column(unique = true)
     private String username;
 
     @NotBlank(message = "Password is mandatory")
-    private String doctorPassword;
+    private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = true) // make it nullable temporarily
     @Enumerated(EnumType.STRING)
-    private Role role=Role.DOCTOR;
-
-    // One-to-many relationship with Availability
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    private List<Availability> doctorAvailabilities;
-
-    // One-to-many relationship with Appointment
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL)
-    @JsonManagedReference("appointment-doctor")  // Same unique name as in Appointment entity
-    private List<Appointment> doctorAppointments;
+    private RoleEnum role = RoleEnum.DOCTOR;
 
     // Getters and Setters
     public Long getId() {
@@ -50,20 +37,20 @@ public class Doctor {
         this.id = id;
     }
 
-    public String getDoctorName() {
-        return doctorName;
+    public String getName() {
+        return name;
     }
 
-    public void setDoctorName(String doctorName) {
-        this.doctorName = doctorName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getDoctorSpecialization() {
-        return doctorSpecialization;
+    public String getSpecialization() {
+        return specialization;
     }
 
-    public void setDoctorSpecialization(String doctorSpecialization) {
-        this.doctorSpecialization = doctorSpecialization;
+    public void setSpecialization(String specialization) {
+        this.specialization = specialization;
     }
 
     public String getUsername() {
@@ -74,35 +61,19 @@ public class Doctor {
         this.username = username;
     }
 
-    public String getDoctorPassword() {
-        return doctorPassword;
+    public String getPassword() {
+        return password;
     }
 
-    public void setDoctorPassword(String doctorPassword) {
-        this.doctorPassword = doctorPassword;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public List<Availability> getDoctorAvailabilities() {
-        return doctorAvailabilities;
-    }
-
-    public void setDoctorAvailabilities(List<Availability> doctorAvailabilities) {
-        this.doctorAvailabilities = doctorAvailabilities;
-    }
-
-    public List<Appointment> getDoctorAppointments() {
-        return doctorAppointments;
-    }
-
-    public void setDoctorAppointments(List<Appointment> doctorAppointments) {
-        this.doctorAppointments = doctorAppointments;
-    }
-
-    public Role getRole() {
+    public RoleEnum getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setRole(RoleEnum roleEnum) {
+        this.role = roleEnum;
     }
 }

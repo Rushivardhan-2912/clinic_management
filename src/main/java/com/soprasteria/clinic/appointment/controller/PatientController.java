@@ -3,26 +3,31 @@ package com.soprasteria.clinic.appointment.controller;
 import com.soprasteria.clinic.appointment.dto.PatientDTO;
 import com.soprasteria.clinic.appointment.entity.Patient;
 import com.soprasteria.clinic.appointment.service.PatientService;
+
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/patients")
+@RequestMapping("/patients")
 public class PatientController {
 
 	private static final Logger logger = LogManager.getLogger(PatientController.class);
 
-	@Autowired
-	private PatientService patientService;
+	private final PatientService patientService;
+
+	public PatientController(PatientService patientService) {
+		this.patientService = patientService;
+	}
 
 	@PostMapping
-	public ResponseEntity<?> registerPatient(@RequestBody Patient patient) {
+	public ResponseEntity<?> registerPatient(@Valid @RequestBody Patient patient) {
 		logger.info("Attempting to register new patient with username: {}", patient.getUsername());
 		return patientService.registerPatient(patient);
 	}
@@ -37,9 +42,9 @@ public class PatientController {
 	}
 
 	@PutMapping("/{id}")
-	@PreAuthorize("hasRole('PATIENT')")
+	@PreAuthorize("hasAnyRole('PATIENT', 'ADMIN')")
 	@SecurityRequirement( name = "bearerAuth")
-	public ResponseEntity<?> updatePatient(@RequestBody PatientDTO patientDTO,
+	public ResponseEntity<?> updatePatient(@Valid @RequestBody PatientDTO patientDTO,
 										   @PathVariable Long id,
 										   Authentication authentication) {
 		logger.info("Attempting to update patient with ID: {} by user: {}", id, authentication.getName());

@@ -6,14 +6,12 @@ import com.soprasteria.clinic.appointment.entity.Patient;
 import com.soprasteria.clinic.appointment.repo.AdminRepository;
 import com.soprasteria.clinic.appointment.repo.DoctorRepository;
 import com.soprasteria.clinic.appointment.repo.PatientRepository;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -26,14 +24,17 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private static final Logger logger = LogManager.getLogger(CustomUserDetailsService.class);
 
-    @Autowired
-    private AdminRepository adminRepo;
+    private final AdminRepository adminRepo;
+    private final DoctorRepository doctorRepo;
+    private final PatientRepository patientRepo;
 
-    @Autowired
-    private DoctorRepository doctorRepo;
-
-    @Autowired
-    private PatientRepository patientRepo;
+    public CustomUserDetailsService(AdminRepository adminRepo,
+                                  DoctorRepository doctorRepo,
+                                  PatientRepository patientRepo) {
+        this.adminRepo = adminRepo;
+        this.doctorRepo = doctorRepo;
+        this.patientRepo = patientRepo;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -55,7 +56,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             logger.info("Found doctor with username: {}", username);
             return new User(
                     doctor.get().getUsername(),
-                    doctor.get().getDoctorPassword(),
+                    doctor.get().getPassword(),
                     Collections.singletonList(new SimpleGrantedAuthority("ROLE_DOCTOR"))
             );
         }
@@ -66,7 +67,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             logger.info("Found patient with username: {}", username);
             return new User(
                     patient.get().getUsername(),
-                    patient.get().getPatientPassword(),
+                    patient.get().getPassword(),
                     Collections.singletonList(new SimpleGrantedAuthority("ROLE_PATIENT"))
             );
         }

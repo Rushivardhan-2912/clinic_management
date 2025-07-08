@@ -1,13 +1,12 @@
 package com.soprasteria.clinic.appointment.entity;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.soprasteria.clinic.appointment.util.Status;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity
 public class Appointment {
@@ -19,17 +18,17 @@ public class Appointment {
 
     @NotNull(message = "Appointment date cannot be null")
     @FutureOrPresent(message = "Appointment date must be today or future")
-    private LocalDate appointmentDate;
+    private LocalDate date;
 
     @NotNull(message = "Start time cannot be null")
-    private LocalTime appointmentStartTime;
+    private LocalTime startTime;
 
     @NotNull(message = "End time cannot be null")
-    private LocalTime appointmentEndTime;
+    private LocalTime endTime;
 
     @Enumerated(EnumType.STRING)
     @NotNull(message = "Status is mandatory")
-    private Status appointmentStatus;
+    private StatusEnum status;
 
     // Many-to-one relationship with Patient
     @ManyToOne
@@ -51,36 +50,36 @@ public class Appointment {
         this.id = id;
     }
 
-    public LocalDate getAppointmentDate() {
-        return appointmentDate;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void setAppointmentDate(LocalDate appointmentDate) {
-        this.appointmentDate = appointmentDate;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
-    public LocalTime getAppointmentStartTime() {
-        return appointmentStartTime;
+    public LocalTime getStartTime() {
+        return startTime;
     }
 
-    public void setAppointmentStartTime(LocalTime appointmentStartTime) {
-        this.appointmentStartTime = appointmentStartTime;
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
     }
 
-    public LocalTime getAppointmentEndTime() {
-        return appointmentEndTime;
+    public LocalTime getEndTime() {
+        return endTime;
     }
 
-    public void setAppointmentEndTime(LocalTime appointmentEndTime) {
-        this.appointmentEndTime = appointmentEndTime;
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
     }
 
-    public Status getAppointmentStatus() {
-        return appointmentStatus;
+    public StatusEnum getStatus() {
+        return status;
     }
 
-    public void setAppointmentStatus(Status appointmentStatus) {
-        this.appointmentStatus = appointmentStatus;
+    public void setStatus(StatusEnum appointmentStatusEnum) {
+        this.status = appointmentStatusEnum;
     }
 
     public Patient getPatient() {

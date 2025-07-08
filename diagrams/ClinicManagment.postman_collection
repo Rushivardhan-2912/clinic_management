@@ -1,0 +1,570 @@
+{
+	"info": {
+		"_postman_id": "c55c06a9-8624-4002-a748-3b289ca5ea15",
+		"name": "Clinic-Appointment",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44419482",
+		"_collection_link": "https://rushi-6056234.postman.co/workspace/Rushi's-Workspace~fa81d286-184a-495b-836d-2cb9c666567a/collection/44419482-c55c06a9-8624-4002-a748-3b289ca5ea15?action=share&source=collection_link&creator=44419482"
+	},
+	"item": [
+		{
+			"name": "Doctor",
+			"item": [
+				{
+					"name": "registerDoctor",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"\",\r\n  \"specialization\": \"\",\r\n  \"username\": \"\",\r\n  \"password\": \"\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PATH}}/doctors",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"doctors"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "viewalldoctors",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/doctors?page=1&size=1",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"doctors"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "size",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateDetails",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"Dr S Amandeep\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PATH}}/doctors/1",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"doctors",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteDoctor",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/doctors/5",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"doctors",
+								"5"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patient",
+			"item": [
+				{
+					"name": "GetAllPatients",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PATH}}/patients?page=0&size=10",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"patients"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdatePatientdetails",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"string\",\r\n  \"email\": \"string\",\r\n  \"phoneNumber\": \"2417067073\",\r\n  \"age\": \"string\",\r\n  \"username\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PATH}}/patients/1",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"patients",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RegisterPatient",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"name\": \"string\",\r\n  \"email\": \"string\",\r\n  \"phoneNumber\": \"5137860608\",\r\n  \"age\": \"94\",\r\n  \"username\": \"string\",\r\n  \"password\": \"string\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PATH}}/patients",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"patients"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeletePatient",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/patients/8",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"patients",
+								"8"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Availability",
+			"item": [
+				{
+					"name": "GetAllAvailabilities",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/availabilities",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"availabilities"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AddAvailability",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-05-29\",\r\n  \"startTime\": \"14:30:00\",\r\n  \"endTime\": \"14:30:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PATH}}/availabilities/doctor/1",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"availabilities",
+								"doctor",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateAvailability",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJrYWxjIiwicm9sZXMiOlsiUk9MRV9ET0NUT1IiXSwiaWF0IjoxNzQ3ODExMjEyLCJleHAiOjE3NDc4MTQ4MTJ9.tneCrT-bnY4NPrA34iXiqgTKY6_Ar3wk9Oval62mOtY",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-05-29\",\r\n  \"startTime\": \"14:30:00\",\r\n  \"endTime\": \"14:30:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PATH}}/availabilities/1",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"availabilities",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteAvailability",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/availabilities/11",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"availabilities",
+								"11"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GetAvailabilitieswithdoctorId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/availabilities/doctor/2",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"availabilities",
+								"doctor",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Appointments",
+			"item": [
+				{
+					"name": "bookAppointment",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-05-29\",\r\n  \"startTime\": \"16:30:00\",\r\n  \"endTime\": \"16:45:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PATH}}/appointments/patient/1",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"appointments",
+								"patient",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ViewAppointments",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/appointments?page=0&size=10",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"appointments"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "0"
+								},
+								{
+									"key": "size",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteAppointments",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/appointments/16/patient/7",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"appointments",
+								"16",
+								"patient",
+								"7"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAptwithpatientid",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/appointments/patient/1",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"appointments",
+								"patient",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getApptwithdoctorId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{PATH}}/appointments/doctor/1",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"appointments",
+								"doctor",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "RescheduleAppt",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"date\": \"2025-05-29\",\r\n  \"startTime\": \"16:45:00\",\r\n  \"endTime\": \"16:55:00\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{PATH}}/appointments/1",
+							"host": [
+								"{{PATH}}"
+							],
+							"path": [
+								"appointments",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "token_generator",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\":\"rbgathram\",\r\n    \"password\":\"Rushi@123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{PATH}}/auth/login",
+					"host": [
+						"{{PATH}}"
+					],
+					"path": [
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJBZG1pbiIsInJvbGVzIjpbIlJPTEVfQURNSU4iXSwiaWF0IjoxNzQ4NTM4OTk2LCJleHAiOjE3NDg1NDI1OTZ9.q15TlDHlALQESujMaKadWRiJ5u1lAtxfBbtv1ACYutUAYltfB-lcCyi-vpYxEaCrlzgNyCTRJ8t0kEzFxL4BpBDVYfggHJeYCWxzheSmX-khUmSLo0kqfBs6-wWI7QJDyCJbYL5aVVoLTSjTJ21gQCgZgUIJq2SRHFHKAUKUGjGmklfTWgpX7H6Ftl1TIPcTQJFlitnylBSfxApLCrJ1T5rkaCAqJ4gnIQVAz1zJIcgLkDoJSWJt8S8gpr-NCUEaWUYgN94CE0gMdPTdd6fCEemOrCLTrQtd3ZlY-k_nkkgQ9baKxuoUh5w7JN46zgRONEmMUZgPiFDNbQFf-oCUqA",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "PATH",
+			"value": "http://localhost:1229/api/v1",
+			"type": "string"
+		}
+	]
+}

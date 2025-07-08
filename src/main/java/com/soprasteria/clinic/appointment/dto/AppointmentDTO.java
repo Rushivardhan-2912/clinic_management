@@ -1,7 +1,11 @@
 package com.soprasteria.clinic.appointment.dto;
 
 
-import com.soprasteria.clinic.appointment.entity.Status;
+import com.soprasteria.clinic.appointment.entity.StatusEnum;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -9,10 +13,19 @@ import java.time.LocalTime;
 public class AppointmentDTO {
 
 	private Long id;
-	private LocalDate appointmentDate;
-    private LocalTime appointmentStartTime;
-    private LocalTime appointmentEndTime;
-    private Status appointmentStatus;
+
+	@NotNull(message = "Appointment date cannot be null")
+	@FutureOrPresent(message = "Appointment date must be today or future")
+	private LocalDate date;
+
+	@NotNull(message = "Start time cannot be null")
+    private LocalTime startTime;
+
+	@NotNull(message = "End time cannot be null")
+    private LocalTime endTime;
+
+	@Enumerated(EnumType.STRING)
+    private StatusEnum status;
     
     private PatientDTO patient;
     private DoctorDTO doctor;
@@ -25,36 +38,36 @@ public class AppointmentDTO {
 		this.id = id;
 	}
 
-	public LocalDate getAppointmentDate() {
-		return appointmentDate;
+	public LocalDate getDate() {
+		return date;
 	}
 
-	public void setAppointmentDate(LocalDate appointmentDate) {
-		this.appointmentDate = appointmentDate;
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 
-	public LocalTime getAppointmentStartTime() {
-		return appointmentStartTime;
+	public LocalTime getStartTime() {
+		return startTime;
 	}
 
-	public void setAppointmentStartTime(LocalTime appointmentStartTime) {
-		this.appointmentStartTime = appointmentStartTime;
+	public void setStartTime(LocalTime startTime) {
+		this.startTime = startTime;
 	}
 
-	public LocalTime getAppointmentEndTime() {
-		return appointmentEndTime;
+	public LocalTime getEndTime() {
+		return endTime;
 	}
 
-	public void setAppointmentEndTime(LocalTime appointmentEndTime) {
-		this.appointmentEndTime = appointmentEndTime;
+	public void setEndTime(LocalTime endTime) {
+		this.endTime = endTime;
 	}
 
-	public Status getAppointmentStatus() {
-		return appointmentStatus;
+	public StatusEnum getStatus() {
+		return status;
 	}
 
-	public void setAppointmentStatus(Status appointmentStatus) {
-		this.appointmentStatus = appointmentStatus;
+	public void setStatus(StatusEnum appointmentStatusEnum) {
+		this.status = appointmentStatusEnum;
 	}
 
 	public PatientDTO getPatient() {

@@ -1,13 +1,16 @@
 package com.soprasteria.clinic.appointment.dto;
 
+import jakarta.persistence.Column;
+
 public class DoctorDTO {
 
 	private Long id;
 
-	private String doctorName;
+	private String name;
 
-	private String doctorSpecialization;
+	private String specialization;
 
+	@Column(unique = true)
 	private String username;
 
 	public DoctorDTO() {
@@ -21,20 +24,20 @@ public class DoctorDTO {
 		this.id = id;
 	}
 
-	public String getDoctorName() {
-		return doctorName;
+	public String getName() {
+		return name;
 	}
 
-	public void setDoctorName(String doctorName) {
-		this.doctorName = doctorName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public String getDoctorSpecialization() {
-		return doctorSpecialization;
+	public String getSpecialization() {
+		return specialization;
 	}
 
-	public void setDoctorSpecialization(String doctorSpecialization) {
-		this.doctorSpecialization = doctorSpecialization;
+	public void setSpecialization(String specialization) {
+		this.specialization = specialization;
 	}
 
 	public String getUsername() {

@@ -1,6 +1,5 @@
 package com.soprasteria.clinic.appointment.entity;
 
-import com.soprasteria.clinic.appointment.util.Role;
 import jakarta.persistence.*;
 
 @Entity
@@ -10,11 +9,13 @@ public class Admin {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(unique = true)
 	private String username;
 	private String password;
 
+	@Column(nullable = true) // make it nullable temporarily
 	@Enumerated(EnumType.STRING)
-	private Role role = Role.ADMIN;
+	private RoleEnum role = RoleEnum.ADMIN;
 
 	// Constructors
 	public Admin() {
@@ -23,7 +24,7 @@ public class Admin {
 	public Admin(String username, String password) {
 		this.username = username;
 		this.password = password;
-		this.role = Role.ADMIN;
+		this.role = RoleEnum.ADMIN;
 	}
 
 	// Getters and Setters
@@ -51,11 +52,11 @@ public class Admin {
 		this.password = password;
 	}
 
-	public Role getRole() {
+	public RoleEnum getRole() {
 		return role;
 	}
 
-	public void setRole(Role role) {
-		this.role = role;
+	public void setRole(RoleEnum roleEnum) {
+		this.role = roleEnum;
 	}
 }

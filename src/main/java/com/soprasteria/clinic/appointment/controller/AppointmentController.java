@@ -1,33 +1,34 @@
 package com.soprasteria.clinic.appointment.controller;
 
 import com.soprasteria.clinic.appointment.dto.AppointmentDTO;
-import com.soprasteria.clinic.appointment.repo.PatientRepository;
 import com.soprasteria.clinic.appointment.service.AppointmentService;
+
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/appointments")
+@RequestMapping("/appointments")
 @SecurityRequirement( name = "bearerAuth")
 public class AppointmentController {
 
 	private static final Logger logger = LogManager.getLogger(AppointmentController.class);
 
-	@Autowired
-	private AppointmentService appointmentService;
+	private final AppointmentService appointmentService;
 
-	@Autowired
-	private PatientRepository patientRepository;
+	public AppointmentController(AppointmentService appointmentService) {
+		this.appointmentService = appointmentService;
+	}
 
 	@PostMapping("/patient/{id}")
-	@PreAuthorize("hasRole('PATIENT')")
-	public ResponseEntity<?> bookAppointment(@RequestBody AppointmentDTO appointmentDTO,
+	@PreAuthorize("hasAnyRole('ADMIN','PATIENT')")
+	public ResponseEntity<?> bookAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO,
 											 @PathVariable Long id,
 											 Authentication authentication) {
 		logger.info("Attempting to book appointment for patient ID: {}", id);
@@ -41,17 +42,17 @@ public class AppointmentController {
 														@RequestParam(defaultValue = "10") int size,
 														Authentication authentication) {
 		logger.info("Retrieving appointments for patient ID: {} ", id);
-		return appointmentService.viewAllAppointmentsForPatient(id, authentication);
+		return appointmentService.viewAllAppointmentsForPatient(id, authentication.getName(),page,size);
 	}
 
 	@GetMapping("/doctor/{id}")
 	@PreAuthorize("hasAnyRole('DOCTOR', 'ADMIN')")
-	public ResponseEntity<?> viewAppointmentsForDoctor(@PathVariable Long id,
+	public ResponseEntity<?> viewAppointmentsForDoctor(@Valid @PathVariable Long id,
 													   @RequestParam(defaultValue = "0") int page,
 													   @RequestParam(defaultValue = "10") int size,
 													   Authentication authentication) {
 		logger.info("Retrieving appointments for doctor ID: {}", id);
-		return appointmentService.viewAllAppointmentsForDoctor(id, authentication);
+		return appointmentService.viewAllAppointmentsForDoctor(id, authentication.getName(),page,size);
 	}
 
 	@GetMapping
@@ -59,12 +60,12 @@ public class AppointmentController {
 	public ResponseEntity<?> viewAllAppointments(@RequestParam(defaultValue = "0") int page,
 												 @RequestParam(defaultValue = "10") int size) {
 		logger.info("Retrieving all appointments");
-		return appointmentService.viewAllAppointments();
+		return appointmentService.viewAllAppointments(page,size);
 	}
 
 	@PutMapping("/{appointmentId}")
-	@PreAuthorize("hasRole('PATIENT')")
-	public ResponseEntity<?> updateAppointment(@RequestBody AppointmentDTO appointmentDTO,
+	@PreAuthorize("hasAnyRole('ADMIN','PATIENT')")
+	public ResponseEntity<?> updateAppointment(@Valid @RequestBody AppointmentDTO appointmentDTO,
 											   @PathVariable Long appointmentId,
 											   Authentication authentication) {
 		logger.info("Attempting to update appointment ID: {}", appointmentId);
@@ -72,11 +73,11 @@ public class AppointmentController {
 	}
 
 	@DeleteMapping("/{appointmentId}/patient/{patientId}")
-	@PreAuthorize("hasRole('PATIENT')")
+	@PreAuthorize("hasAnyRole('ADMIN','PATIENT')")
 	public ResponseEntity<?> cancelAppointment(@PathVariable Long appointmentId,
 											   @PathVariable Long patientId,
 											   Authentication authentication) {
 		logger.info("Attempting to cancel appointment ID: {} for patient ID: {}", appointmentId, patientId);
-		return appointmentService.cancelAppointment(appointmentId, patientId, authentication);
+		return appointmentService.cancelAppointment(appointmentId, patientId, authentication.getName());
 	}
 }

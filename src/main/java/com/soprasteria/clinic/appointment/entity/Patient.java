@@ -1,13 +1,12 @@
 package com.soprasteria.clinic.appointment.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.soprasteria.clinic.appointment.util.Role;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
-import java.util.List;
-
 @Entity
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Patient {
 
     @Id
@@ -16,40 +15,33 @@ public class Patient {
     private Long id;
 
     @NotBlank(message = "Patient name is required")
-    private String patientName;
+    private String name;
 
     @NotBlank(message = "Patient email is required")
     @Column(unique = true)
     @Email(message = "Please provide a valid email address")
-    private String patientEmail;
+    private String email;
 
     @NotBlank(message = "Patient phone number is required")
     @Column(unique = true)
-    @Pattern(regexp = "^[0-9]{10}$", message = "Please provide a valid phone number")
+    @Pattern(regexp = "^\\d{10}$", message = "Please provide a valid phone number")
     @Size(min = 10, max = 10, message = "Please provide a valid phone number")
-    private String patientPhoneNumber;
+    private String phoneNumber;
 
     @NotBlank(message = "Age is mandatory")
-    @Pattern(regexp = "^\\d{1,3}$", message = "Age must be between 1 and 3 digits")
-    @Min(value = 0, message = "Age must be at least 0")
-    @Max(value = 120, message = "Age must not exceed 120")
-    private String patientAge;
+    @Pattern(regexp = "^\\d{1,2}$", message = "Age must be between 1 and 2 digits")
+    private String age;
 
     @NotBlank(message = "Patient username is required")
     @Column(unique = true)
     private String username;
 
     @NotBlank(message = "Password is mandatory")
-    private String patientPassword;
+    private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = true) // make it nullable temporarily
     @Enumerated(EnumType.STRING)
-    private Role role = Role.PATIENT;
-
-    // One-to-many relationship with Appointment
-    @OneToMany(mappedBy = "patient", cascade = CascadeType.ALL)
-    @JsonManagedReference("appointment-patient")  // Same unique name as in Appointment entity
-    private List<Appointment> patientAppointments;
+    private RoleEnum role = RoleEnum.PATIENT;
 
     // Getters and Setters
     public Long getId() {
@@ -60,36 +52,36 @@ public class Patient {
         this.id = id;
     }
 
-    public String getPatientName() {
-        return patientName;
+    public String getName() {
+        return name;
     }
 
-    public void setPatientName(String patientName) {
-        this.patientName = patientName;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getPatientEmail() {
-        return patientEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setPatientEmail(String patientEmail) {
-        this.patientEmail = patientEmail;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public String getPatientPhoneNumber() {
-        return patientPhoneNumber;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setPatientPhoneNumber(String patientPhoneNumber) {
-        this.patientPhoneNumber = patientPhoneNumber;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
-    public String getPatientAge() {
-        return patientAge;
+    public String getAge() {
+        return age;
     }
 
-    public void setPatientAge(String patientAge) {
-        this.patientAge = patientAge;
+    public void setAge(String age) {
+        this.age = age;
     }
 
     public String getUsername() {
@@ -100,27 +92,19 @@ public class Patient {
         this.username = username;
     }
 
-    public String getPatientPassword() {
-        return patientPassword;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPatientPassword(String patientPassword) {
-        this.patientPassword = patientPassword;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public List<Appointment> getPatientAppointments() {
-        return patientAppointments;
-    }
-
-    public void setPatientAppointments(List<Appointment> patientAppointments) {
-        this.patientAppointments = patientAppointments;
-    }
-
-    public Role getRole() {
+    public RoleEnum getRole() {
         return role;
     }
 
-    public void setRole(Role role) {
-        this.role = role;
+    public void setRole(RoleEnum roleEnum) {
+        this.role = roleEnum;
     }
 }

@@ -1,12 +1,26 @@
 package com.soprasteria.clinic.appointment.dto;
 
+import jakarta.persistence.Column;
+import jakarta.validation.constraints.*;
+
 public class PatientDTO {
 
 	private Long id;
-	private String patientName;
-	private String patientEmail;
-	private String patientPhoneNumber;
-	private String patientAge;
+
+	private String name;
+
+	@Column(unique = true)
+	@Email(message = "Please provide a valid email address")
+	private String email;
+
+	@Column(unique = true)
+	@Pattern(regexp = "^\\d{10}$", message = "Please provide a valid phone number")
+	@Size(min = 10, max = 10, message = "Please provide a valid phone number")
+	private String phoneNumber;
+
+	private String age;
+
+	@Column(unique = true)
 	private String username;
 
 	public String getUsername() {
@@ -25,35 +39,35 @@ public class PatientDTO {
 		this.id = id;
 	}
 
-	public String getPatientName() {
-		return patientName;
+	public String getName() {
+		return name;
 	}
 
-	public void setPatientName(String patientName) {
-		this.patientName = patientName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
-	public String getPatientEmail() {
-		return patientEmail;
+	public String getEmail() {
+		return email;
 	}
 
-	public void setPatientEmail(String patientEmail) {
-		this.patientEmail = patientEmail;
+	public void setEmail(String email) {
+		this.email = email;
 	}
 
-	public String getPatientPhoneNumber() {
-		return patientPhoneNumber;
+	public String getPhoneNumber() {
+		return phoneNumber;
 	}
 
-	public void setPatientPhoneNumber(String patientPhoneNumber) {
-		this.patientPhoneNumber = patientPhoneNumber;
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
-	public String getPatientAge() {
-		return patientAge;
+	public String getAge() {
+		return age;
 	}
 
-	public void setPatientAge(String patientAge) {
-		this.patientAge = patientAge;
+	public void setAge(String age) {
+		this.age = age;
 	}
 }
