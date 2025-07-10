@@ -13,8 +13,8 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git credentialsId: 'rb.gathram',
-                    url: 'https://innersource.soprasteria.com/rb.gathram/clinic_management.git',
+                git credentialsId: 'github-credentials-id',
+                    url: 'https://github.com/Rushivardhan-2912/clinic_management.git',
                     branch: 'master'
             }
         }
@@ -28,11 +28,10 @@ pipeline {
 
     post {
         success {
-            echo ' Build completed successfully!'
+            echo 'Build completed successfully!'
         }
-
         failure {
-            echo ' Build failed!'
+            echo 'Build failed!'
         }
     }
 }
