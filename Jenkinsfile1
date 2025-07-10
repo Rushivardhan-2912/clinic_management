@@ -1,0 +1,47 @@
+pipeline {
+    agent any
+
+    parameters {
+        string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'Git branch to build')
+    }
+
+    environment {
+        JAVA_HOME = tool name: 'JDK', type: 'jdk'
+        PATH = "${JAVA_HOME}/bin;${env.PATH}" // Windows
+    }
+
+    tools {
+        maven 'Maven 3.8.4'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                script {
+                    try {
+                        git credentialsId: 'github-credentials-id',
+                            url: 'https://github.com/Rushivardhan-2912/clinic_management.git',
+                            branch: "${params.BRANCH_NAME}"
+                    } catch (e) {
+                        error "Branch '${params.BRANCH_NAME}' does not exist. Please check the branch name and try again."
+                    }
+                }
+            }
+        }
+
+        stage('Build Project') {
+            steps {
+                bat 'mvn clean install'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Build completed successfully!'
+        }
+        failure {
+            echo 'Build failed!'
+        }
+    }
+}
